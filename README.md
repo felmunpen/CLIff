@@ -3,9 +3,9 @@
 
 > **A CLI-based algorithmic MIDI generator for polymetric riffs and mathematical pattern composition.**
 
-**CLIff** (*Command Line Interface + Riff*) es un generador algorítmico de música por consola diseñado para productores, compositores y entusiastas del *math rock*, metal progresivo y música electrónica experimental. 
+**CLIff** (*Command Line Interface + Riff*) es un generador algorítmico de música por consola diseñado para productores, compositores y entusiastas del *math rock*, metal progresivo y música electrónica experimental.
 
-La herramienta permite crear secuencias MIDI multipista basadas en **desfases métricos (polimetrías)** —como encajar patrones de 7 *beats* sobre estructuras globales en 4/4— calculando automáticamente los remates de residuo (*tails*), ofreciendo una preescucha instantánea mediante SoundFonts y exportando archivos MIDI listos para usar en cualquier DAW.
+La herramienta permite crear secuencias MIDI multipista basadas en **desfases métricos (polimetrías)** —como encajar patrones de 7 *beats* sobre estructuras globales en 4/4— calculando automáticamente los remates de residuo (*tails*), ofreciendo una preescucha bajo demanda mediante SoundFonts y exportando archivos MIDI listos para usar en cualquier DAW.
 
 ---
 
@@ -13,13 +13,14 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 
 *   **Motor de Polimetría y Residuo:** Define la duración del patrón principal en *beats* asimétricos. CLIff repite el patrón y calcula un remate (*tail*) truncado para completar la métrica global sin descarrilar el compás.
 *   **4 Pistas Autogeneradas:**
-    *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0).
-    *   **Bajo / Guitarra:** Ejecuta la línea melódica principal generada por el algoritmo.
-    *   **Arpegiador:** Movimiento rápido recorriendo los grados de la escala seleccionada.
+    *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Medio/Agudo*.
+    *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
+    *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
     *   **Percusión:** Base rítmica fija en 4/4 (caja y charles) con un bombo que clona dinámicamente los acentos del bajo.
+*   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Selección Escalar:** Trabaja sobre la nota Do (C) en modos Mayor, Menor (Eólica), Menor Armónica, Frigio y Frigio Dominante.
-*   **Preescucha Inmediata:** Renderizado automático a audio (`.wav`) mediante una SoundFont integrada para evaluar las secuencias directamente desde la terminal.
-*   **Exportación Multipista:** Genera archivos `.mid` de 4 canales listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
+*   **Preescucha Bajo Demanda:** Renderizado a audio (`.wav`) mediante una SoundFont integrada y reproducción con un botón de *play* desde la terminal.
+*   **Exportación Multipista:** Genera archivos `.mid` de 4 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 
 ---
 
@@ -43,7 +44,7 @@ El motor calcula que el patrón entra **4 veces completas** (7 x 4 = 28 beats) y
 
 ### Prerrequisitos
 *   **Python 3.10+**
-*   **FluidSynth** (requerido para el renderizado y preescucha de audio en tiempo real).
+*   **FluidSynth** (requerido para el renderizado y preescucha de audio). Se usa vía su binario de línea de comandos.
 
 #### Instalación de FluidSynth:
 *   **macOS:** `brew install fluidsynth`
@@ -54,8 +55,8 @@ El motor calcula que el patrón entra **4 veces completas** (7 x 4 = 28 beats) y
 
 ```bash
 # Clonar el repositorio
-git clone [https://github.com/tu-usuario/cliff.git](https://github.com/tu-usuario/cliff.git)
-cd cliff
+git clone https://github.com/tu-usuario/CLIff.git
+cd CLIff
 
 # Crear y activar el entorno virtual
 python -m venv venv
@@ -78,18 +79,18 @@ python main.py
 Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
-2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*) y la respiración del Pad (`0` para *Drone Infinito*).
-3.  **Reglas Algorítmicas:** Selecciona las duraciones permitidas (negra, corchea, semicorchea...) y el salto melódico máximo.
-4.  **Mezclador:** Ajusta el nivel de volumen y *velocity* plano para cada pista.
-5.  **Generación:** Escucha la claqueta de inicio, reproduce el audio renderizado y localiza tus archivos en la carpeta `/output`.
+2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Medio/Agudo) del Pad.
+3.  **Reglas Algorítmicas:** Selecciona las duraciones permitidas, el salto melódico máximo y la densidad (Baja/Media/Alta).
+4.  **Mezclador:** Ajusta el *velocity* y el volumen por pista.
+5.  **Generación:** Genera la pieza y, desde el resumen, usa **▶ Play** para escucharla o **💾 Exportar** para guardar los archivos en `/output` (o en la carpeta que elijas).
 
 ---
 
 ## 📁 Archivos Generados
 
-Los archivos procesados se guardan en el directorio `/output` con el nombre de los parámetros utilizados:
+Los archivos se guardan en `/output` con el nombre de los parámetros utilizados:
 
-*   `output/cliff_160bpm_p7.mid` $\rightarrow$ Archivo MIDI multipista (4 canales).
+*   `output/cliff_160bpm_p7.mid` $\rightarrow$ Archivo MIDI multipista (4 pistas).
 *   `output/cliff_160bpm_p7.wav` $\rightarrow$ Audio renderizado con la SoundFont por defecto.
 
 ---
@@ -101,3 +102,6 @@ Los archivos procesados se guardan en el directorio `/output` con el nombre de l
 *   [ ] Grados negativos por debajo de la tónica principal en el bajo.
 *   [ ] Soporte para métricas compuestas y no cuaternarias (3/4, 6/8, 12/8).
 *   [ ] Compilación a ejecutable independiente sin dependencias externas (`.exe` / `.app`).
+*   [ ] Tail generado como nuevo motivo (en lugar de truncado del patrón).
+*   [ ] Selección de instrumento por pista.
+*   [ ] Mejora de la convención de nombres de archivo.

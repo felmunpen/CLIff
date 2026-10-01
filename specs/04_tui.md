@@ -6,23 +6,28 @@
 
 1. **Header:** Banner ASCII de **CLIff** generado con `rich.panel`.
 2. **Paso 1: Configuración Global**
-   - `bpm`: Número entero (Rango: 40 - 240, Default: 120).
-   - `total_bars`: Número entero (Rango: 4 - 64, Default: 8).
-3. **Paso 2: Polimetría**
-   - `pattern_beats`: Flotante/Entero (Ej: 3, 5, 7, 9.5).
-   - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = Re-disparo).
+   - `bpm`: Entero (40–240, default 120).
+   - `total_bars`: Entero (4–64, default 8).
+3. **Paso 2: Polimetría y Pad**
+   - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
+   - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
+   - `pad_mode`: Select (`Mono`, `Acorde`).
+   - `pad_register`: Select (`Grave`, `Medio`, `Agudo`).
 4. **Paso 3: Reglas Algorítmicas**
-   - `scale`: Select (`Mayor`, `Menor Eólica`, `Menor Armónica`, `Frigio`, `Frigio Dominante`).
-   - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea Puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
-   - `max_jump`: Slider/Int (1 a 5).
+   - `scale`: Select (`Mayor`, `Menor (Eólica)`, `Menor Armónica`, `Frigio`, `Frigio Dominante`).
+   - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
+   - `max_jump`: Slider/Int (1–5).
+   - `density`: Select (`Baja`, `Media`, `Alta`).
 5. **Paso 4: Mezclador**
-   - Velocities planos por pista (0 - 127).
-
----
+   - Por cada pista (Pad, Bass, Arpeggiator, Percusión):
+     - `velocity`: Int (0–127).
+     - `volume`: Int (0–100).
+6. **Paso 5: Generar**
+   - Al confirmar, se ejecuta `engine_math` + `engine_midi` (MIDI en memoria).
 
 ### 1.2 Vista de Resultados (`rich.table`)
 
-Al terminar el cálculo, se presenta un panel con el desglose matemático:
+Tras generar, se muestra el desglose matemático y las acciones disponibles:
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
@@ -33,4 +38,13 @@ Al terminar el cálculo, se presenta un panel con el desglose matemático:
 │ Repeticiones Completas: 4 ciclos (28.0 beats)            │
 │ Residuo (Tail): 4.0 beats                                │
 └──────────────────────────────────────────────────────────┘
+
+Acciones:
+  ▶ Play      (renderiza el .wav y lo reproduce)
+  💾 Exportar  (guarda .mid y .wav en /output o carpeta elegida)
+  ↩ Volver     (modificar parámetros)
 ```
+
+- **▶ Play**: `engine_audio` renderiza el `.wav` (perezoso) con FluidSynth y lo reproduce.
+- **💾 Exportar**: guarda `.mid` y `.wav` con el nombre `cliff_<bpm>bpm_p<patrón>.<ext>`; carpeta por defecto `/output`, con opción de elegir otra.
+- Los tiempos y duraciones se muestran al usuario con **nombres de nota** (negra, corchea…), nunca en ticks enteros.
