@@ -1,0 +1,11 @@
+# CLIff — Polymetric MIDI Generator Dependencies
+
+# TUI y Formato de Terminal
+rich>=13.7.0
+questionary>=2.0.1
+
+# Generación y Manipulación MIDI
+mido>=1.3.2
+
+# Sintetizador y Renderizado de Audio SoundFont
+pyfluidsynth>=1.3.2
