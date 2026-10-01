@@ -95,13 +95,14 @@ Los archivos se guardan en `/output` con el nombre de los parámetros utilizados
 
 ---
 
-## 🗺️ Roadmap (Futuras Versiones)
+## 🗺️ Feature Futuras (Roadmap)
 
-*   [ ] Guardado y carga de Semillas Numéricas (*Seeds*) para reproducir o compartir patrones exactos.
-*   [ ] Algoritmos de variación dinámica de *velocity* y silencios rítmicos.
-*   [ ] Grados negativos por debajo de la tónica principal en el bajo.
-*   [ ] Soporte para métricas compuestas y no cuaternarias (3/4, 6/8, 12/8).
-*   [ ] Compilación a ejecutable independiente sin dependencias externas (`.exe` / `.app`).
-*   [ ] Tail generado como nuevo motivo (en lugar de truncado del patrón).
-*   [ ] Selección de instrumento por pista.
-*   [ ] Mejora de la convención de nombres de archivo.
+1. Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos.
+2. Algoritmos de variación dinámica de *velocity* y silencios rítmicos.
+3. Grados negativos por debajo de la tónica principal en el bajo.
+4. Soporte para métricas compuestas y no cuaternarias (3/4, 6/8, 12/8).
+5. Compilación a ejecutable independiente sin dependencias externas (`.exe` / `.app`).
+6. Implementación del Arpegiador (hoy pista fantasma en el MVP).
+7. Tail generado como nuevo motivo (en lugar de truncado del patrón).
+8. Selección de instrumento por pista.
+9. Mejora de la convención de nombres de archivo.
