@@ -1,1 +1,13 @@
+# Entornos virtuales y caché de Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Archivos generados en tiempo de ejecución
+output/
+*.mid
+*.wav
+
+# Configuración de agentes
 .agents/
