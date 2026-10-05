@@ -17,6 +17,9 @@ En código (`mido` es 0-indexado) se resta 1: `canal_mido = canal_gm - 1`.
 El archivo `.mid` tiene **4 pistas**. La de Arpeggiator se incluye **vacía**
 (solo con su `program_change`), reservada para una feature futura.
 
+> La escala usada en todas las pistas es la **transpuesta según la tónica** elegida
+> (`SCALE_PITCHES[scale] + TONIC_SEMITONES[tonic]`), calculada en `engine_math`.
+
 ### 1.2 Reglas Especiales de Construcción
 
 #### A. Regla de Drone Infinito (Pad)

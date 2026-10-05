@@ -29,6 +29,22 @@ class PadRegister(str, Enum):
     HIGH = "Agudo"   # C4
 
 
+class TonicEnum(str, Enum):
+    """Nota central (tónica) elegible. Solo sostenidos en el MVP."""
+    C = "C"
+    C_SHARP = "C#"
+    D = "D"
+    D_SHARP = "D#"
+    E = "E"
+    F = "F"
+    F_SHARP = "F#"
+    G = "G"
+    G_SHARP = "G#"
+    A = "A"
+    A_SHARP = "A#"
+    B = "B"
+
+
 TICKS_PER_BEAT = 480  # ppq usada por mido
 BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
 
@@ -63,8 +79,37 @@ SCALE_PITCHES: dict[ScaleEnum, list[int]] = {
     ScaleEnum.PHRYGIAN_DOMINANT: [48, 49, 52, 53, 55, 56, 58, 60, 61, 64, 65, 67, 68, 70, 72],
 }
 
-# Tónica fija en el MVP (C = Do). Futura configurabilidad (podrá incluir # o b).
-TONIC = "c"
+# Nota central (tónica) elegible. Solo sostenidos en el MVP.
+# TONIC_SEMITONES: semitonos respecto a C; TONIC_SLUGS: slug para nombre de archivo.
+TONIC_SEMITONES: dict[TonicEnum, int] = {
+    TonicEnum.C: 0,
+    TonicEnum.C_SHARP: 1,
+    TonicEnum.D: 2,
+    TonicEnum.D_SHARP: 3,
+    TonicEnum.E: 4,
+    TonicEnum.F: 5,
+    TonicEnum.F_SHARP: 6,
+    TonicEnum.G: 7,
+    TonicEnum.G_SHARP: 8,
+    TonicEnum.A: 9,
+    TonicEnum.A_SHARP: 10,
+    TonicEnum.B: 11,
+}
+
+TONIC_SLUGS: dict[TonicEnum, str] = {
+    TonicEnum.C: "c",
+    TonicEnum.C_SHARP: "cs",
+    TonicEnum.D: "d",
+    TonicEnum.D_SHARP: "ds",
+    TonicEnum.E: "e",
+    TonicEnum.F: "f",
+    TonicEnum.F_SHARP: "fs",
+    TonicEnum.G: "g",
+    TonicEnum.G_SHARP: "gs",
+    TonicEnum.A: "a",
+    TonicEnum.A_SHARP: "as",
+    TonicEnum.B: "b",
+}
 
 # Desplazamiento del Bajo respecto a la escala base (dos octavas abajo, -> C1).
 BASS_PITCH_OFFSET = -24
@@ -97,6 +142,7 @@ class SongConfig:
     total_bars: int = 8
     pattern_beats: float = 7.0
     pad_breath_bars: int = 0            # 0 = Drone Infinito; 1-8 = re-disparo
+    tonic: TonicEnum = TonicEnum.C      # nota central (tónica)
     scale: ScaleEnum = ScaleEnum.MINOR_AEOLIAN
     allowed_durations: list[float] = field(default_factory=lambda: [1.0, 0.5, 0.25])
     max_jump: int = 3

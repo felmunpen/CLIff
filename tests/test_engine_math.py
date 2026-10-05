@@ -4,7 +4,7 @@ import random
 import unittest
 
 from cliff import engine_math
-from cliff.models import DensityEnum, SongConfig, beats_to_ticks
+from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, beats_to_ticks
 
 TICKS = 480
 
@@ -64,6 +64,19 @@ class TestPolymetrySummary(unittest.TestCase):
         self.assertEqual(engine_math.polymetry_summary(8, 8.0), (4, 0))
         self.assertEqual(engine_math.polymetry_summary(4, 3.0), (5, 1 * TICKS))
         self.assertEqual(engine_math.polymetry_summary(8, 7.5), (4, 2 * TICKS))
+
+
+class TestTonicTransposition(unittest.TestCase):
+    def test_transposes_bass_and_pad(self):
+        random.seed(1)
+        config = SongConfig(tonic=TonicEnum.E, scale=ScaleEnum.MINOR_AEOLIAN,
+                            pad_mode="Mono", pad_breath_bars=0)
+        seq = engine_math.generate_sequence(config)
+        # Tónica E (MIDI 52 en C3). Bajo dos octavas abajo -> E1 = 28.
+        self.assertEqual(seq.bass_notes[0].pitch, 28)
+        # Pad Mono (drone): raíz en registro Medio -> E3 = 52.
+        self.assertEqual(len(seq.pad_notes), 1)
+        self.assertEqual(seq.pad_notes[0].pitch, 52)
 
 
 if __name__ == "__main__":

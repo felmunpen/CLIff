@@ -15,12 +15,13 @@ from .models import (
     DURATION_OPTIONS,
     SCALE_SLUGS,
     TICKS_PER_BEAT,
-    TONIC,
+    TONIC_SLUGS,
     DensityEnum,
     PadMode,
     PadRegister,
     ScaleEnum,
     SongConfig,
+    TonicEnum,
     TrackConfig,
 )
 
@@ -130,6 +131,9 @@ def _collect_config(console: Console) -> SongConfig:
     ).ask())
 
     # Paso 3: Reglas algorítmicas
+    tonic = TonicEnum(questionary.select(
+        "Nota central (tónica)", choices=[t.value for t in TonicEnum],
+    ).ask())
     scale = ScaleEnum(questionary.select(
         "Escala", choices=[s.value for s in ScaleEnum],
     ).ask())
@@ -177,6 +181,7 @@ def _collect_config(console: Console) -> SongConfig:
         total_bars=total_bars,
         pattern_beats=pattern_beats,
         pad_breath_bars=pad_breath_bars,
+        tonic=tonic,
         scale=scale,
         allowed_durations=allowed_durations,
         max_jump=max_jump,
@@ -206,7 +211,7 @@ def _build_prefix(config: SongConfig) -> str:
     """Construye el prefijo del nombre de archivo (sin número)."""
     date_str = date.today().strftime("%d%m%Y")
     compas = f"{BEATS_PER_BAR}4"
-    return f"{TONIC}_{SCALE_SLUGS[config.scale]}_{compas}_{config.bpm}bpm_{date_str}"
+    return f"{TONIC_SLUGS[config.tonic]}_{SCALE_SLUGS[config.scale]}_{compas}_{config.bpm}bpm_{date_str}"
 
 
 def _next_number(folder: str, prefix: str) -> int:

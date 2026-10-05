@@ -14,6 +14,7 @@ from .models import (
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
     TICKS_PER_BEAT,
+    TONIC_SEMITONES,
     DensityEnum,
     NoteEvent,
     PadMode,
@@ -178,7 +179,7 @@ def generate_sequence(config: SongConfig) -> SequenceData:
     full_loops, tail_ticks = polymetry_summary(config.total_bars, config.pattern_beats)
     tail_rhythm_ticks = build_tail_rhythm(pattern_rhythm_ticks, tail_ticks)
 
-    scale_pitches = SCALE_PITCHES[config.scale]
+    scale_pitches = [p + TONIC_SEMITONES[config.tonic] for p in SCALE_PITCHES[config.scale]]
     riff = generate_melody_indices(len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches))
 
     bass_notes = build_bass_notes(

@@ -16,6 +16,7 @@
    - `pad_mode`: Select (`Mono`, `Acorde`).
    - `pad_register`: Select (`Grave`, `Medio`, `Agudo`).
 4. **Paso 3: Reglas Algorítmicas**
+   - `tonic`: Select (nota central, 12 notas solo sostenidos: `C`, `C#`, `D`, ..., `B`).
    - `scale`: Select (`Mayor`, `Menor (Eólica)`, `Menor Armónica`, `Frigio`, `Frigio Dominante`).
    - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
    - `max_jump`: Slider/Int (1–5).

@@ -27,6 +27,21 @@ class PadRegister(str, Enum):
     LOW = "Grave"    # C2
     MID = "Medio"    # C3
     HIGH = "Agudo"   # C4
+
+class TonicEnum(str, Enum):
+    """Nota central (tónica) elegible. Solo sostenidos en el MVP."""
+    C = "C"
+    C_SHARP = "C#"
+    D = "D"
+    D_SHARP = "D#"
+    E = "E"
+    F = "F"
+    F_SHARP = "F#"
+    G = "G"
+    G_SHARP = "G#"
+    A = "A"
+    A_SHARP = "A#"
+    B = "B"
 ```
 
 ### 1.2 Constantes
@@ -34,8 +49,20 @@ class PadRegister(str, Enum):
 ```python
 TICKS_PER_BEAT = 480  # ppq usada por mido
 BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
-TONIC = "c"           # tónica fija en el MVP (Do); futura configurabilidad (#/b)
 BASS_PITCH_OFFSET = -24  # bajo dos octavas por debajo de la escala base (-> C1)
+
+# Nota central (tónica): semitonos respecto a C y slug para nombre de archivo.
+TONIC_SEMITONES: dict[TonicEnum, int] = {
+    TonicEnum.C: 0, TonicEnum.C_SHARP: 1, TonicEnum.D: 2, TonicEnum.D_SHARP: 3,
+    TonicEnum.E: 4, TonicEnum.F: 5, TonicEnum.F_SHARP: 6, TonicEnum.G: 7,
+    TonicEnum.G_SHARP: 8, TonicEnum.A: 9, TonicEnum.A_SHARP: 10, TonicEnum.B: 11,
+}
+
+TONIC_SLUGS: dict[TonicEnum, str] = {
+    TonicEnum.C: "c", TonicEnum.C_SHARP: "cs", TonicEnum.D: "d", TonicEnum.D_SHARP: "ds",
+    TonicEnum.E: "e", TonicEnum.F: "f", TonicEnum.F_SHARP: "fs", TonicEnum.G: "g",
+    TonicEnum.G_SHARP: "gs", TonicEnum.A: "a", TonicEnum.A_SHARP: "as", TonicEnum.B: "b",
+}
 
 # Opciones de duración rítmica disponibles en la TUI (nombre, beats)
 DURATION_OPTIONS: list[tuple[str, float]] = [
@@ -95,6 +122,7 @@ class SongConfig:
     total_bars: int = 8
     pattern_beats: float = 7.0
     pad_breath_bars: int = 0            # 0 = Drone Infinito; 1-8 = re-disparo
+    tonic: TonicEnum = TonicEnum.C      # nota central (tónica)
     scale: ScaleEnum = ScaleEnum.MINOR_AEOLIAN
     allowed_durations: list[float] = field(default_factory=lambda: [1.0, 0.5, 0.25])
     max_jump: int = 3

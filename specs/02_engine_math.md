@@ -50,7 +50,7 @@
 **Función:** `generate_melody_indices(event_count, max_jump, scale_len) -> list[int]`
 
 **Reglas:**
-- El evento 0 es **SIEMPRE el índice 0** (tónica C).
+- El evento 0 es **SIEMPRE el índice 0** (tónica elegida).
 - Para los eventos intermedios:
   - Dirección aleatoria (`+1` subir, `-1` bajar).
   - Paso `S ∈ [1, max_jump]`.
@@ -68,7 +68,7 @@
 ### 1.5 Construcción de las Pistas
 
 #### A. Bass (línea melódica principal)
-- Pitch por nota: `SCALE_PITCHES[scale][indice] + BASS_PITCH_OFFSET` (dos octavas abajo, -> C1).
+- Pitch por nota: `SCALE_PITCHES[scale][indice] + TONIC_SEMITONES[tonic] + BASS_PITCH_OFFSET` (dos octavas abajo de la escala transpuesta).
 - Se combina el riff con el ritmo expandido (ciclos completos + tail).
 - `velocity` = `bass_config.velocity` (plano).
 
@@ -93,6 +93,7 @@
 ### 1.6 Orquestación
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
 
+0. Transponer la escala según la tónica: `scale_pitches = [p + TONIC_SEMITONES[tonic] for p in SCALE_PITCHES[scale]]`.
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
 3. Generar el riff y ensamblar `bass_notes`.

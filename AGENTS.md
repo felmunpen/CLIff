@@ -19,7 +19,7 @@ El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacke
 ### 3.1 Pistas y Asignaciones (Estándar General MIDI)
 CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se resta 1):
 1. **Pad (Canal 1):** Instrumento GM 89 (Pad 2 - Warm). Mantiene el sostén armónico.
-2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal, **dos octavas por debajo** de la escala base (tónica C1).
+2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal, **dos octavas por debajo** de la escala base (tónica en octava grave, p. ej. C1).
 3. **Arpegiador (Canal 3):** Instrumento GM 80 (Square Lead). **Pista fantasma en el MVP** (presente pero sin notas, reservada para una feature futura).
 4. **Percusión (Canal 10):** Set estándar GM de percusión.
 
@@ -37,13 +37,13 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 - **Precisión:** toda la aritmética de tiempos se hace en **ticks enteros** (`480` ppq), sin coma flotante en las posiciones de los eventos.
 
 ### 3.4 El Motor Melódico
-- **Tónica fija (MVP):** C (Do).
+- **Tónica configurable:** El usuario elige la nota central (12 notas, solo sostenidos).
 - **Escalas Permitidas (2 octavas):** Mayor, Menor (Eólica), Menor Armónica, Frigio, Frigio Dominante.
 - El algoritmo trata la escala como un array de índices (donde el índice 0 es la nota C grave).
 - **Salto Melódico Máximo:** Parámetro del usuario (rango 1 a 5). Distancia máxima de intervalos entre notas consecutivas.
 - **Límites (Bounce):** Si el índice calculado sale del rango, la dirección del movimiento se invierte automáticamente.
 - **Riff:** la melodía se genera **una sola vez** y se repite en cada ciclo (el tail es su truncado).
-- **Regla Estricta:** La primera nota del patrón principal (y por tanto del tail) es SIEMPRE el índice 0 (la tónica C).
+- **Regla Estricta:** La primera nota del patrón principal (y por tanto del tail) es SIEMPRE el índice 0 (la tónica elegida).
 
 ### 3.5 Reglas Específicas de las Pistas
 - **Pad (Respiración):** El usuario define cada cuántos compases se vuelve a disparar el acorde/nota. **Regla de Drone Infinito:** Si la respiración es `0`, se envía un único `Note On` en el beat 0 y un `Note Off` al final del último compás.
@@ -59,7 +59,7 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Medio/Agudo).
-3. **Reglas Algorítmicas:** Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
+3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
 6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).

@@ -18,7 +18,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
     *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
     *   **Percusión:** Base rítmica fija en 4/4 (caja y charles) con un bombo que clona dinámicamente los acentos del bajo.
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
-*   **Selección Escalar:** Trabaja sobre la nota Do (C) en modos Mayor, Menor (Eólica), Menor Armónica, Frigio y Frigio Dominante.
+*   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
 *   **Exportación Multipista:** Genera archivos `.mid` de 4 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
 
@@ -76,7 +76,7 @@ Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
 2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Medio/Agudo) del Pad.
-3.  **Reglas Algorítmicas:** Selecciona las duraciones permitidas, el salto melódico máximo y la densidad (Baja/Media/Alta).
+3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo y la densidad (Baja/Media/Alta).
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).
 6.  **Generación:** Genera las piezas y, desde el resumen, usa **💾 Exportar** para guardar los archivos `.mid` en `/output` (o en la carpeta que elijas).
