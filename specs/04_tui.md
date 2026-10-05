@@ -40,11 +40,9 @@ Tras generar, se muestra el desglose matemático y las acciones disponibles:
 └──────────────────────────────────────────────────────────┘
 
 Acciones:
-  ▶ Play      (renderiza el .wav y lo reproduce)
-  💾 Exportar  (guarda .mid y .wav en /output o carpeta elegida)
+  💾 Exportar  (guarda el .mid en /output o carpeta elegida)
   ↩ Volver     (modificar parámetros)
 ```
 
-- **▶ Play**: `engine_audio` renderiza el `.wav` (perezoso) con FluidSynth y lo reproduce.
-- **💾 Exportar**: guarda `.mid` y `.wav` con el nombre `cliff_<bpm>bpm_p<patrón>.<ext>`; carpeta por defecto `/output`, con opción de elegir otra.
+- **💾 Exportar**: guarda el `.mid` con el nombre `cliff_<bpm>bpm_p<patrón>.mid`; carpeta por defecto `/output`, con opción de elegir otra.
 - Los tiempos y duraciones se muestran al usuario con **nombres de nota** (negra, corchea…), nunca en ticks enteros.

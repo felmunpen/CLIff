@@ -19,11 +19,8 @@ CLIff/                      # repositorio / marca
 │   ├── models.py           # Dataclasses, Enums y constantes
 │   ├── engine_math.py      # Lógica matemática, polimetría y melodía (puro)
 │   ├── engine_midi.py      # Construcción de pistas MIDI en memoria
-│   ├── engine_audio.py     # Render WAV (FluidSynth) y reproducción
 │   └── tui.py              # Formularios Questionary y vistas Rich
-├── assets/
-│   └── default.sf2         # SoundFont ligera por defecto (<10MB)
-└── output/                 # Carpeta de exportación por defecto (.mid y .wav)
+└── output/                 # Carpeta de exportación por defecto (.mid)
 ```
 
 > La marca es **CLIff**; el paquete Python se importa como **cliff** (minúsculas).
@@ -40,21 +37,14 @@ CLIff/                      # repositorio / marca
                                                           ▼
                      [ engine_midi.py ] ──(MidiFile en memoria)
                                                           │
-                                                          ├─ Exportar ──> output/*.mid
-                                                          ▼
-                     [ engine_audio.py ] ──(FluidSynth)
-                                                          │
-                                                          ├─ ▶ Play ──> reproducción
-                                                          └─ Exportar ──> output/*.wav
+                                                          └─ Exportar ──> output/*.mid
 ```
 
 Flujo de acciones del usuario (ver `specs/04`):
 
 1. **Generar**: `tui.py` → `engine_math.py` (cálculo) → `engine_midi.py` (MIDI en memoria).
-2. **▶ Play**: `engine_audio.py` renderiza el `.wav` (perezoso) y lo reproduce.
-3. **💾 Exportar**: guarda `.mid` y `.wav` en `/output` (o carpeta elegida).
+2. **💾 Exportar**: guarda el `.mid` en `/output` (o carpeta elegida).
 
 ## 3. Principios de Diseño
 - **Inmutabilidad de Configuración:** `SongConfig` se construye en `tui.py` y se pasa como objeto de lectura a los motores.
 - **Cero Efectos Secundarios en Math:** `engine_math.py` es puramente determinista, no depende de librerías MIDI ni de I/O, y trabaja con **ticks enteros** (sin aritmética en coma flotante para los tiempos).
-- **Desacoplamiento de Audio:** `engine_midi.py` solo construye el `.mid` en memoria. `engine_audio.py` renderiza a `.wav` (perezoso) y reproduce. Nada se escribe a disco hasta que el usuario exporta.

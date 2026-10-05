@@ -1,4 +1,4 @@
-# Spec 03: Motor MIDI y Audio
+# Spec 03: Motor MIDI
 
 ## 1. Módulo `cliff/engine_midi.py`
 
@@ -46,47 +46,3 @@ El archivo `.mid` tiene **4 pistas**. La de Arpeggiator se incluye **vacía**
 - `TICKS_PER_BEAT = 480`.
 - `ticks = round(duración_en_beats * 480)`.
 - Los tiempos acumulados se calculan en **ticks enteros** (sin coma flotante).
-
-## 2. Módulo `cliff/engine_audio.py`
-
-### 2.1 Renderizado con FluidSynth (perezoso)
-**Función:** `render_midi_to_wav(midi_path: str, sf2_path: str, output_wav_path: str) -> bool`
-
-**Implementación (vía subprocess con el binario `fluidsynth`):**
-
-```python
-import subprocess
-
-def render_midi_to_wav(midi_path, sf2_path, output_wav_path):
-    cmd = [
-        "fluidsynth", "-ni", sf2_path, midi_path,
-        "-F", output_wav_path, "-r", "44100",
-    ]
-    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return result.returncode == 0
-```
-
-> Se ejecuta **solo cuando** el usuario pulsa ▶ Play o 💾 Exportar (no en la generación).
-
-### 2.2 Reproducción (best-effort)
-**Función:** `play_audio(wav_path: str) -> None`
-
-Usa el reproductor por defecto del sistema vía subprocess:
-
-```python
-import sys
-import subprocess
-
-def play_audio(wav_path):
-    if sys.platform == "darwin":                 # macOS
-        cmd = ["afplay", wav_path]
-    elif sys.platform.startswith("win"):         # Windows
-        cmd = ["powershell", "-c",
-               f'(New-Object Media.SoundPlayer "{wav_path}").PlaySync()']
-    else:                                        # Linux
-        cmd = ["aplay", wav_path]                # fallback: paplay
-    subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-```
-
-- **Best-effort**: si el reproductor no existe o falla, no se interrumpe la ejecución;
-  simplemente se informa de la ruta del `.wav`.
