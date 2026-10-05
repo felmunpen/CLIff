@@ -24,8 +24,7 @@ class PadMode(str, Enum):
 
 
 class PadRegister(str, Enum):
-    LOW = "Grave"    # C2
-    MID = "Medio"    # C3
+    LOW = "Grave"    # C3
     HIGH = "Agudo"   # C4
 
 
@@ -65,8 +64,7 @@ DENSITY_RANGES: dict[DensityEnum, tuple[int, int]] = {
 
 # Desplazamiento de octava del Pad según registro (en semitonos)
 PAD_REGISTER_OFFSET: dict[PadRegister, int] = {
-    PadRegister.LOW: -12,   # C2 (MIDI 36)
-    PadRegister.MID: 0,     # C3 (MIDI 48)
+    PadRegister.LOW: 0,     # C3 (MIDI 48)
     PadRegister.HIGH: 12,   # C4 (MIDI 60)
 }
 
@@ -148,7 +146,7 @@ class SongConfig:
     max_jump: int = 3
     density: DensityEnum = DensityEnum.MEDIUM
     pad_mode: PadMode = PadMode.CHORD
-    pad_register: PadRegister = PadRegister.MID
+    pad_register: PadRegister = PadRegister.LOW
     bass_config: TrackConfig = field(default_factory=TrackConfig)
     pad_config: TrackConfig = field(default_factory=TrackConfig)
     arp_config: TrackConfig = field(default_factory=TrackConfig)   # reservado (pista fantasma)

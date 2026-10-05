@@ -31,7 +31,7 @@ El archivo `.mid` tiene **4 pistas**. La de Arpeggiator se incluye **vacía**
 #### B. Nota/Acorde del Pad (derivado de la escala)
 - `CHORD`: `[SCALE_PITCHES[0], SCALE_PITCHES[2], SCALE_PITCHES[4]]` (grados 1, 3 y 5).
 - `MONO`: `[SCALE_PITCHES[0]]` (tónica).
-- Registrar: sumar `PAD_REGISTER_OFFSET[pad_register]` a cada nota (`LOW=-12`, `MID=0`, `HIGH=+12`).
+- Registrar: sumar `PAD_REGISTER_OFFSET[pad_register]` a cada nota (`LOW=0`, `HIGH=+12`).
 
 #### C. Clonación del Kick (Percusión)
 - La pista de Percusión analiza los tiempos absolutos de `Note On` de la pista **Bass**.

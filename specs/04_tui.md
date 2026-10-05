@@ -14,7 +14,7 @@
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
    - `pad_mode`: Select (`Mono`, `Acorde`).
-   - `pad_register`: Select (`Grave`, `Medio`, `Agudo`).
+   - `pad_register`: Select (`Grave`, `Agudo`).
 4. **Paso 3: Reglas Algorítmicas**
    - `tonic`: Select (nota central, 12 notas solo sostenidos: `C`, `C#`, `D`, ..., `B`).
    - `scale`: Select (`Mayor`, `Menor (Eólica)`, `Menor Armónica`, `Frigio`, `Frigio Dominante`).

@@ -13,7 +13,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 
 *   **Motor de Polimetría y Residuo:** Define la duración del patrón principal en *beats* asimétricos. CLIff repite el patrón y calcula un remate (*tail*) truncado para completar la métrica global sin descarrilar el compás.
 *   **4 Pistas Autogeneradas:**
-    *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Medio/Agudo*.
+    *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Agudo*.
     *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
     *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
     *   **Percusión:** Base rítmica fija en 4/4 (caja y charles) con un bombo que clona dinámicamente los acentos del bajo.
@@ -75,7 +75,7 @@ python main.py
 Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
-2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Medio/Agudo) del Pad.
+2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
 3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo y la densidad (Baja/Media/Alta).
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).

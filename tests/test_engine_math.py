@@ -74,7 +74,7 @@ class TestTonicTransposition(unittest.TestCase):
         seq = engine_math.generate_sequence(config)
         # Tónica E (MIDI 52 en C3). Bajo dos octavas abajo -> E1 = 28.
         self.assertEqual(seq.bass_notes[0].pitch, 28)
-        # Pad Mono (drone): raíz en registro Medio -> E3 = 52.
+        # Pad Mono (drone): raíz en registro Grave -> E3 = 52.
         self.assertEqual(len(seq.pad_notes), 1)
         self.assertEqual(seq.pad_notes[0].pitch, 52)
 

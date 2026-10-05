@@ -48,7 +48,7 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 ### 3.5 Reglas Específicas de las Pistas
 - **Pad (Respiración):** El usuario define cada cuántos compases se vuelve a disparar el acorde/nota. **Regla de Drone Infinito:** Si la respiración es `0`, se envía un único `Note On` en el beat 0 y un `Note Off` al final del último compás.
   - **Modo:** `Mono` (tónica) o `Acorde` (grados 1-3-5 de la escala).
-  - **Registro:** `Grave` (C2), `Medio` (C3) o `Agudo` (C4).
+  - **Registro:** `Grave` (C3) o `Agudo` (C4).
 - **Percusión:**
   - Caja (Snare): Golpe estático en los tiempos 2 y 4 de cada compás.
   - Hi-Hat: Pulsos constantes en corcheas.
@@ -58,7 +58,7 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
-2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Medio/Agudo).
+2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
 3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
