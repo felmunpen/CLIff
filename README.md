@@ -5,7 +5,7 @@
 
 **CLIff** (*Command Line Interface + Riff*) es un generador algorítmico de música por consola diseñado para productores, compositores y entusiastas del *math rock*, metal progresivo y música electrónica experimental.
 
-La herramienta permite crear secuencias MIDI multipista basadas en **desfases métricos (polimetrías)** —como encajar patrones de 7 *beats* sobre estructuras globales en 4/4— calculando automáticamente los remates de residuo (*tails*), ofreciendo una preescucha bajo demanda mediante SoundFonts y exportando archivos MIDI listos para usar en cualquier DAW.
+La herramienta permite crear secuencias MIDI multipista basadas en **desfases métricos (polimetrías)** —como encajar patrones de 7 *beats* sobre estructuras globales en 4/4— calculando automáticamente los remates de residuo (*tails*) y exportando archivos MIDI listos para usar en cualquier DAW.
 
 ---
 
@@ -19,7 +19,6 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
     *   **Percusión:** Base rítmica fija en 4/4 (caja y charles) con un bombo que clona dinámicamente los acentos del bajo.
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Selección Escalar:** Trabaja sobre la nota Do (C) en modos Mayor, Menor (Eólica), Menor Armónica, Frigio y Frigio Dominante.
-*   **Preescucha Bajo Demanda:** Renderizado a audio (`.wav`) mediante una SoundFont integrada y reproducción con un botón de *play* desde la terminal.
 *   **Exportación Multipista:** Genera archivos `.mid` de 4 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 
 ---
@@ -44,12 +43,6 @@ El motor calcula que el patrón entra **4 veces completas** (7 x 4 = 28 beats) y
 
 ### Prerrequisitos
 *   **Python 3.10+**
-*   **FluidSynth** (requerido para el renderizado y preescucha de audio). Se usa vía su binario de línea de comandos.
-
-#### Instalación de FluidSynth:
-*   **macOS:** `brew install fluidsynth`
-*   **Linux (Ubuntu/Debian):** `sudo apt install fluidsynth`
-*   **Windows:** Descargar el ejecutable oficial o instalar vía `winget install FluidSynth`.
 
 ### Instalación del Proyecto
 
@@ -82,7 +75,7 @@ Flujo de uso en la terminal:
 2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Medio/Agudo) del Pad.
 3.  **Reglas Algorítmicas:** Selecciona las duraciones permitidas, el salto melódico máximo y la densidad (Baja/Media/Alta).
 4.  **Mezclador:** Ajusta el *velocity* y el volumen por pista.
-5.  **Generación:** Genera la pieza y, desde el resumen, usa **▶ Play** para escucharla o **💾 Exportar** para guardar los archivos en `/output` (o en la carpeta que elijas).
+5.  **Generación:** Genera la pieza y, desde el resumen, usa **💾 Exportar** para guardar el archivo `.mid` en `/output` (o en la carpeta que elijas).
 
 ---
 
@@ -91,7 +84,6 @@ Flujo de uso en la terminal:
 Los archivos se guardan en `/output` con el nombre de los parámetros utilizados:
 
 *   `output/cliff_160bpm_p7.mid` $\rightarrow$ Archivo MIDI multipista (4 pistas).
-*   `output/cliff_160bpm_p7.wav` $\rightarrow$ Audio renderizado con la SoundFont por defecto.
 
 ---
 

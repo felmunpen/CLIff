@@ -5,14 +5,13 @@
 
 **Descripción corta:** *A CLI-based algorithmic MIDI generator for polymetric riffs and mathematical pattern composition.*
 
-El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacker/productor" donde el usuario introduzca parámetros numéricos en la terminal y obtenga archivos `.mid` multipista y `.wav` (vía SoundFont integrada) listos para arrastrar a un DAW.
+El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacker/productor" donde el usuario introduzca parámetros numéricos en la terminal y obtenga archivos `.mid` multipista listos para arrastrar a un DAW.
 
 ## 2. Stack Tecnológico Estricto
 - **Lenguaje:** Python 3.10+
 - **Interfaz de Usuario (TUI):** `rich` (para salidas visuales, paneles, tablas y colores) y `questionary` (para menús e inputs interactivos).
 - **Generación MIDI:** `mido` (y sus constructores `MetaMessage`, `Message`, `MidiFile`, `MidiTrack`).
-- **Preescucha y Render de Audio:** integración vía `subprocess` con el ejecutable CLI de FluidSynth (el binario es prerrequisito del sistema; **no** se usa `pyfluidsynth`).
-- **Empaquetado (Final):** `PyInstaller` (configurado para incluir archivos `.sf2` de menos de 10MB en el ejecutable final).
+- **Empaquetado (Final):** `PyInstaller` (configurado para generar un ejecutable independiente).
 - **PROHIBIDO:** Tecnologías web (JS, HTML, WebAudio), frameworks GUI de escritorio (Tkinter, PyQt, Electron). Todo el software debe ejecutarse estrictamente en la terminal.
 
 ## 3. Arquitectura Musical del MVP
@@ -62,11 +61,11 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Medio/Agudo).
 3. **Reglas Algorítmicas:** Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
 4. **Mezclador:** Velocity (0-127) y Volumen (0-100) por pista.
-5. **Acciones:** Generar. Tras generar, el usuario dispone de **▶ Play** (preescucha, render perezoso del `.wav`) y **💾 Exportar** (guardar `.mid` y `.wav` en `/output` o carpeta elegida).
+5. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el `.mid` en `/output` o carpeta elegida).
 
 ## 5. Directivas Estrictas para la IA (Guardrails)
 - **Mantener la simplicidad del MVP:** No introducir progresiones de acordes, cambios de compás ni algoritmos de variación de velocity salvo petición explícita para versiones futuras.
-- **Arquitectura Modular:** Separar el código en módulos limpios: `models.py` (dataclasses/enums/constantes), `engine_math.py` (cálculo de secuencias y matrices, puro), `engine_midi.py` (construcción MIDI en memoria), `engine_audio.py` (render WAV y reproducción) y `tui.py` (interfaz interactiva).
+- **Arquitectura Modular:** Separar el código en módulos limpios: `models.py` (dataclasses/enums/constantes), `engine_math.py` (cálculo de secuencias y matrices, puro), `engine_midi.py` (construcción MIDI en memoria) y `tui.py` (interfaz interactiva).
 - **Estética Terminal:** Utilizar `rich` para formatear paneles de estado, barras de progreso y tablas con la estructura polirrítmica calculada.
 - **Precisión Matemática:** Garantizar que los tiempos acumulados de los eventos MIDI no sufran desviaciones por redondeo (se trabaja en ticks enteros).
 
