@@ -1,6 +1,7 @@
 """Interfaz TUI: formularios `questionary` y vistas `rich`."""
 
 import os
+from datetime import date
 from pathlib import Path
 
 import questionary
@@ -10,7 +11,11 @@ from rich.table import Table
 
 from . import engine_midi, engine_math
 from .models import (
+    BEATS_PER_BAR,
     DURATION_OPTIONS,
+    SCALE_SLUGS,
+    TICKS_PER_BEAT,
+    TONIC,
     DensityEnum,
     PadMode,
     PadRegister,
@@ -56,17 +61,63 @@ def _show_header(console: Console) -> None:
     console.print()
 
 
+def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: float) -> None:
+    """Muestra el total de beats y un mapa de bloques (ciclos + tail)."""
+    total_beats = total_bars * BEATS_PER_BAR
+    full_loops, tail_ticks = engine_math.polymetry_summary(total_bars, pattern_beats)
+    tail_beats = tail_ticks / TICKS_PER_BEAT
+
+    # Resolución: 1 bloque = 1 beat; con fracciones de cuarto, 1 bloque = semicorchea.
+    fractional = (pattern_beats % 1 != 0) or (tail_beats % 1 != 0)
+    cells_per_beat = 4 if fractional else 1
+    pattern_cells = round(pattern_beats * cells_per_beat)
+    tail_cells = round(tail_beats * cells_per_beat)
+
+    # Escalado: si la barra supera ~60 caracteres, se reduce proporcionalmente.
+    n_blocks = full_loops + (1 if tail_cells else 0)
+    width = full_loops * pattern_cells + tail_cells + (n_blocks - 1)
+    max_width = 60
+    if width > max_width:
+        scale = width / max_width
+        pattern_cells = max(1, round(pattern_cells / scale))
+        tail_cells = max(1, round(tail_cells / scale)) if tail_cells else 0
+
+    segments = []
+    if full_loops:
+        segments.append("[cyan]" + " ".join(["█" * pattern_cells] * full_loops) + "[/cyan]")
+    if tail_cells:
+        segments.append("[yellow]" + "█" * tail_cells + "[/yellow]")
+    bar = " ".join(segments)
+
+    tail_str = str(int(tail_beats)) if tail_beats.is_integer() else str(tail_beats)
+    legend = (
+        f"{full_loops} ciclos completos + tail de {tail_str} beats"
+        if tail_beats
+        else f"{full_loops} ciclos completos (sin residuo)"
+    )
+
+    console.print()
+    console.print("[bold]Previsualización de polimetría[/bold]")
+    console.print(f"{total_beats} beats totales ({total_bars} compases × {BEATS_PER_BAR})")
+    console.print(bar)
+    console.print(f"[dim]{legend}[/dim]")
+    console.print()
+
+
 def _collect_config(console: Console) -> SongConfig:
     # Paso 1: Configuración global
     bpm = int(questionary.text("BPM (40-240)", default="120", validate=_int_range(40, 240)).ask())
+    console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
     total_bars = int(questionary.text("Duración en compases (4-64)", default="8",
                                       validate=_int_range(4, 64)).ask())
+    console.print(f"[dim]{total_bars} compases × {BEATS_PER_BAR} = {total_bars * BEATS_PER_BAR} beats totales[/dim]")
 
     # Paso 2: Polimetría y Pad
     pattern_beats = float(questionary.text(
         "Duración del patrón en beats (ej. 3, 5, 7, 9.5)",
         default="7.0", validate=_validate_pattern_beats,
     ).ask())
+    _show_polymetry_preview(console, total_bars, pattern_beats)
     pad_breath_bars = int(questionary.text(
         "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
         default="0", validate=_int_range(0, 8),
@@ -101,16 +152,27 @@ def _collect_config(console: Console) -> SongConfig:
     ).ask())
 
     # Paso 4: Mezclador
-    track_configs = {}
-    for label, key in (("Pad", "pad_config"), ("Bajo", "bass_config"),
-                       ("Arpegiador", "arp_config"), ("Percusión", "drums_config")):
-        velocity = int(questionary.text(f"{label} — velocity (0-127)", default="100",
-                                        validate=_int_range(0, 127)).ask())
-        volume = int(questionary.text(f"{label} — volumen (0-100)", default="100",
-                                      validate=_int_range(0, 100)).ask())
-        track_configs[key] = TrackConfig(velocity=velocity, volume=volume)
+    if questionary.confirm("¿Personalizar volumen y velocity de las pistas?", default=False).ask():
+        track_configs = {}
+        for label, key in (("Pad", "pad_config"), ("Bajo", "bass_config"),
+                           ("Arpegiador", "arp_config"), ("Percusión", "drums_config")):
+            velocity = int(questionary.text(f"{label} — velocity (0-127)", default="100",
+                                            validate=_int_range(0, 127)).ask())
+            volume = int(questionary.text(f"{label} — volumen (0-100)", default="100",
+                                          validate=_int_range(0, 100)).ask())
+            track_configs[key] = TrackConfig(velocity=velocity, volume=volume)
+        bass_config = track_configs["bass_config"]
+        pad_config = track_configs["pad_config"]
+        arp_config = track_configs["arp_config"]
+        drums_config = track_configs["drums_config"]
+    else:
+        bass_config = pad_config = arp_config = drums_config = TrackConfig()
 
-    return SongConfig(
+    # Paso 5: Lote
+    variations = int(questionary.text("Variaciones a generar (1-5)", default="1",
+                                      validate=_int_range(1, 5)).ask())
+
+    config = SongConfig(
         bpm=bpm,
         total_bars=total_bars,
         pattern_beats=pattern_beats,
@@ -121,11 +183,12 @@ def _collect_config(console: Console) -> SongConfig:
         density=density,
         pad_mode=pad_mode,
         pad_register=pad_register,
-        bass_config=track_configs["bass_config"],
-        pad_config=track_configs["pad_config"],
-        arp_config=track_configs["arp_config"],
-        drums_config=track_configs["drums_config"],
+        bass_config=bass_config,
+        pad_config=pad_config,
+        arp_config=arp_config,
+        drums_config=drums_config,
     )
+    return config, variations
 
 
 def _show_summary(console: Console, seq) -> None:
@@ -139,29 +202,48 @@ def _show_summary(console: Console, seq) -> None:
     console.print(table)
 
 
-def _pattern_str(pattern_beats: float) -> str:
-    return str(int(pattern_beats)) if pattern_beats.is_integer() else str(pattern_beats)
+def _build_prefix(config: SongConfig) -> str:
+    """Construye el prefijo del nombre de archivo (sin número)."""
+    date_str = date.today().strftime("%d%m%Y")
+    compas = f"{BEATS_PER_BAR}4"
+    return f"{TONIC}_{SCALE_SLUGS[config.scale]}_{compas}_{config.bpm}bpm_{date_str}"
 
 
-def _export(console: Console, config: SongConfig, midi) -> None:
+def _next_number(folder: str, prefix: str) -> int:
+    """Devuelve el siguiente número de archivo libre para `prefix` en `folder`."""
+    marker = prefix + "_"
+    max_n = 0
+    for name in os.listdir(folder):
+        if name.startswith(marker) and name.endswith(".mid"):
+            num_part = name[len(marker):-len(".mid")]
+            if num_part.isdigit():
+                max_n = max(max_n, int(num_part))
+    return max_n + 1
+
+
+def _export(console: Console, config: SongConfig, midis) -> None:
     out_dir = questionary.text("Carpeta de exportación", default=str(DEFAULT_OUTPUT)).ask()
     os.makedirs(out_dir, exist_ok=True)
-    base = f"cliff_{config.bpm}bpm_p{_pattern_str(config.pattern_beats)}"
-    midi_path = os.path.join(out_dir, base + ".mid")
-    midi.save(midi_path)
-    console.print(f"[green]Exportado:[/green] {midi_path}")
+    prefix = _build_prefix(config)
+    n = _next_number(out_dir, prefix)
+    for i, midi in enumerate(midis):
+        midi_path = os.path.join(out_dir, f"{prefix}_{n + i}.mid")
+        midi.save(midi_path)
+        console.print(f"[green]Exportado:[/green] {midi_path}")
 
 
-def _result_screen(console: Console, config: SongConfig, seq, midi) -> str:
+def _result_screen(console: Console, config: SongConfig, seq, midis) -> str:
     """Muestra el resumen y las acciones. Devuelve 'back' o 'quit'."""
     _show_summary(console, seq)
+    if len(midis) > 1:
+        console.print(f"[dim]Se generaron {len(midis)} variaciones.[/dim]")
     while True:
         action = questionary.select(
             "Acción",
             choices=["💾 Exportar", "↩ Volver", "✕ Salir"],
         ).ask()
         if action == "💾 Exportar":
-            _export(console, config, midi)
+            _export(console, config, midis)
         elif action == "↩ Volver":
             return "back"
         else:  # ✕ Salir
@@ -173,10 +255,10 @@ def run() -> None:
     console = Console()
     _show_header(console)
     while True:
-        config = _collect_config(console)
-        sequence = engine_math.generate_sequence(config)
-        midi = engine_midi.build_midi(config, sequence)
-        result = _result_screen(console, config, sequence, midi)
+        config, variations = _collect_config(console)
+        sequences = [engine_math.generate_sequence(config) for _ in range(variations)]
+        midis = [engine_midi.build_midi(config, seq) for seq in sequences]
+        result = _result_screen(console, config, sequences[0], midis)
         if result == "quit":
             console.print("[cyan]¡Hasta pronto![/cyan]")
             break

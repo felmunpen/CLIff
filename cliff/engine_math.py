@@ -8,6 +8,7 @@ import math
 import random
 
 from .models import (
+    BEATS_PER_BAR,
     DENSITY_RANGES,
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
@@ -117,7 +118,7 @@ def build_pad_notes(scale_pitches, pad_mode, pad_register, total_ticks, pad_brea
         for p in pitches:
             notes.append(NoteEvent(pitch=p, start_tick=0, duration_ticks=total_ticks, velocity=velocity))
     else:
-        breath_ticks = pad_breath_bars * 4 * TICKS_PER_BEAT
+        breath_ticks = pad_breath_bars * BEATS_PER_BAR * TICKS_PER_BEAT
         start = 0
         while start < total_ticks:
             dur = min(breath_ticks, total_ticks - start)
@@ -137,7 +138,7 @@ def build_percussion_notes(bass_notes, total_bars, velocity) -> list[NoteEvent]:
         notes.append(NoteEvent(pitch=36, start_tick=b.start_tick, duration_ticks=hit_ticks, velocity=velocity))
 
     # Snare: beats 2 y 4 de cada compás
-    bar_ticks = 4 * TICKS_PER_BEAT
+    bar_ticks = BEATS_PER_BAR * TICKS_PER_BEAT
     for bar in range(total_bars):
         base = bar * bar_ticks
         notes.append(NoteEvent(pitch=38, start_tick=base + TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
@@ -151,17 +152,29 @@ def build_percussion_notes(bass_notes, total_bars, velocity) -> list[NoteEvent]:
     return notes
 
 
+def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
+    """Devuelve (full_loops, tail_ticks) en ticks enteros.
+
+    Fuente única de verdad del residuo polimétrico; la usan `generate_sequence`
+    y la TUI para la previsualización.
+    """
+    total_ticks = total_bars * BEATS_PER_BAR * TICKS_PER_BEAT
+    pattern_ticks = beats_to_ticks(pattern_beats)
+    full_loops = total_ticks // pattern_ticks
+    tail_ticks = total_ticks % pattern_ticks
+    return full_loops, tail_ticks
+
+
 def generate_sequence(config: SongConfig) -> SequenceData:
     """Orquesta el cálculo completo y devuelve un `SequenceData`."""
-    total_ticks = config.total_bars * 4 * TICKS_PER_BEAT
+    total_ticks = config.total_bars * BEATS_PER_BAR * TICKS_PER_BEAT
     allowed_ticks = [beats_to_ticks(d) for d in config.allowed_durations]
     pattern_ticks = beats_to_ticks(config.pattern_beats)
 
     target_notes = resolve_density(config.density, pattern_ticks, allowed_ticks)
     pattern_rhythm_ticks = generate_rhythm_pattern(pattern_ticks, allowed_ticks, target_notes)
 
-    full_loops = total_ticks // pattern_ticks
-    tail_ticks = total_ticks % pattern_ticks
+    full_loops, tail_ticks = polymetry_summary(config.total_bars, config.pattern_beats)
     tail_rhythm_ticks = build_tail_rhythm(pattern_rhythm_ticks, tail_ticks)
 
     scale_pitches = SCALE_PITCHES[config.scale]
@@ -178,7 +191,7 @@ def generate_sequence(config: SongConfig) -> SequenceData:
     percussion_notes = build_percussion_notes(bass_notes, config.total_bars, config.drums_config.velocity)
 
     return SequenceData(
-        total_beats=config.total_bars * 4.0,
+        total_beats=config.total_bars * BEATS_PER_BAR,
         pattern_beats=config.pattern_beats,
         full_loops=full_loops,
         tail_beats=tail_ticks / TICKS_PER_BEAT,

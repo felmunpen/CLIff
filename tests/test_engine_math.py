@@ -58,5 +58,13 @@ class TestSequence(unittest.TestCase):
         self.assertTrue(all(n.start_tick == 0 and n.duration_ticks == total_ticks for n in seq.pad_notes))
 
 
+class TestPolymetrySummary(unittest.TestCase):
+    def test_loops_and_tail(self):
+        self.assertEqual(engine_math.polymetry_summary(8, 7.0), (4, 4 * TICKS))
+        self.assertEqual(engine_math.polymetry_summary(8, 8.0), (4, 0))
+        self.assertEqual(engine_math.polymetry_summary(4, 3.0), (5, 1 * TICKS))
+        self.assertEqual(engine_math.polymetry_summary(8, 7.5), (4, 2 * TICKS))
+
+
 if __name__ == "__main__":
     unittest.main()

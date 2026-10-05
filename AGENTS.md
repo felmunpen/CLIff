@@ -57,11 +57,12 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
 - **Sin claqueta (count-in) en el MVP.**
 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
-1. **Configuración Global:** BPM, Duración en Compases.
+1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Medio/Agudo).
 3. **Reglas Algorítmicas:** Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
-4. **Mezclador:** Velocity (0-127) y Volumen (0-100) por pista.
-5. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el `.mid` en `/output` o carpeta elegida).
+4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
+5. **Lote:** Nº de variaciones a generar (1-5).
+6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).
 
 ## 5. Directivas Estrictas para la IA (Guardrails)
 - **Mantener la simplicidad del MVP:** No introducir progresiones de acordes, cambios de compás ni algoritmos de variación de velocity salvo petición explícita para versiones futuras.

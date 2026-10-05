@@ -34,6 +34,7 @@ class PadRegister(str, Enum):
 ```python
 TICKS_PER_BEAT = 480  # ppq usada por mido
 BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
+TONIC = "c"           # tónica fija en el MVP (Do); futura configurabilidad (#/b)
 
 # Opciones de duración rítmica disponibles en la TUI (nombre, beats)
 DURATION_OPTIONS: list[tuple[str, float]] = [
@@ -64,6 +65,15 @@ SCALE_PITCHES: dict[ScaleEnum, list[int]] = {
     ScaleEnum.HARMONIC_MINOR:    [48, 50, 51, 53, 55, 56, 59, 60, 62, 63, 65, 67, 68, 71, 72],
     ScaleEnum.PHRYGIAN:          [48, 49, 51, 53, 55, 56, 58, 60, 61, 63, 65, 67, 68, 70, 72],
     ScaleEnum.PHRYGIAN_DOMINANT: [48, 49, 52, 53, 55, 56, 58, 60, 61, 64, 65, 67, 68, 70, 72],
+}
+
+# Slug por escala para nombres de archivo (ascii, sin espacios ni '_').
+SCALE_SLUGS: dict[ScaleEnum, str] = {
+    ScaleEnum.MAJOR: "major",
+    ScaleEnum.MINOR_AEOLIAN: "eolian",
+    ScaleEnum.HARMONIC_MINOR: "harmonicminor",
+    ScaleEnum.PHRYGIAN: "phrygian",
+    ScaleEnum.PHRYGIAN_DOMINANT: "phrygiandom",
 }
 ```
 

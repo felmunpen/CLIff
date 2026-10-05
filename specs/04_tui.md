@@ -7,7 +7,9 @@
 1. **Header:** Banner ASCII de **CLIff** generado con `rich.panel`.
 2. **Paso 1: Configuración Global**
    - `bpm`: Entero (40–240, default 120).
+   - Se muestra el compás actual (`4/4`, fijo en el MVP) antes de pedir los compases.
    - `total_bars`: Entero (4–64, default 8).
+   - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats totales`.
 3. **Paso 2: Polimetría y Pad**
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
@@ -19,11 +21,15 @@
    - `max_jump`: Slider/Int (1–5).
    - `density`: Select (`Baja`, `Media`, `Alta`).
 5. **Paso 4: Mezclador**
-   - Por cada pista (Pad, Bass, Arpeggiator, Percusión):
+   - Confirm `y/n`: "¿Personalizar volumen y velocity de las pistas?" (default No).
+   - Si **No**: se usan los valores por defecto (`velocity=100`, `volume=100`) en las 4 pistas.
+   - Si **Sí**, por cada pista (Pad, Bass, Arpeggiator, Percusión):
      - `velocity`: Int (0–127).
      - `volume`: Int (0–100).
-6. **Paso 5: Generar**
-   - Al confirmar, se ejecuta `engine_math` + `engine_midi` (MIDI en memoria).
+6. **Paso 5: Lote**
+   - `variations`: Entero (1–5, default 1). Nº de variaciones (MIDIs) a generar con los mismos parámetros.
+7. **Generar**
+   - Se ejecuta `engine_math` + `engine_midi` una vez por variación (MIDI en memoria).
 
 ### 1.2 Previsualización de Polimetría (`rich`)
 
@@ -69,5 +75,5 @@ Acciones:
   ↩ Volver     (modificar parámetros)
 ```
 
-- **💾 Exportar**: guarda el `.mid` con el nombre `cliff_<bpm>bpm_p<patrón>.mid`; carpeta por defecto `/output`, con opción de elegir otra.
+- **💾 Exportar**: guarda los `.mid` con el nombre `{tónica}_{escala}_{compás}_{bpm}bpm_{fechaDDMMYYYY}_{nº}.mid` (p. ej. `c_eolian_44_146bpm_05102026_3.mid`). El `nº` es el siguiente libre en la carpeta de destino (evita sobreescritura); en lote se asignan números consecutivos.
 - Los tiempos y duraciones se muestran al usuario con **nombres de nota** (negra, corchea…), nunca en ticks enteros.
