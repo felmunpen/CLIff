@@ -12,9 +12,10 @@ En código (`mido` es 0-indexado) se resta 1: `canal_mido = canal_gm - 1`.
 | **Pad** | 1 | 0 | GM 89 (Warm Pad) | Acorde de tónica o nota única; Drone |
 | **Bass** | 2 | 1 | GM 33 (Finger Bass) | Riff melódico (patrón principal), dos octavas por debajo de la escala base |
 | **Arpeggiator** | 3 | 2 | GM 80 (Square Lead) | Pista fantasma (vacía en MVP) |
-| **Percussion** | 10 | 9 | Set estándar de percusión | Snare (38), HiHat (42), Kick (36) |
+| **Guitar** | 4 | 3 | GM 29 (Overdriven Guitar) | Duplica el bajo una octava por encima |
+| **Percussion** | 10 | 9 | Set estándar de percusión | Snare (38), Plato (46/42/51/49/52), Kick (36) |
 
-El archivo `.mid` tiene **4 pistas**. La de Arpeggiator se incluye **vacía**
+El archivo `.mid` tiene **5 pistas**. La de Arpeggiator se incluye **vacía**
 (solo con su `program_change`), reservada para una feature futura.
 
 > La escala usada en todas las pistas es la **transpuesta según la tónica** elegida
@@ -36,8 +37,8 @@ El archivo `.mid` tiene **4 pistas**. La de Arpeggiator se incluye **vacía**
 #### C. Clonación del Kick (Percusión)
 - La pista de Percusión analiza los tiempos absolutos de `Note On` de la pista **Bass**.
 - En cada instante donde el Bass dispara, añade un `Note On` de Kick (nota 36).
-- Mantiene Snare fijo (nota 38) en los beats 2 y 4 de cada compás.
-- Hi-Hat (nota 42) en corcheas constantes (0.5 beats).
+- Mantiene Snare fijo (nota 38) en el beat 3 de cada compás (en 2 y 4 con *double time*).
+- Plato (nota configurable según `CYMBAL_PITCHES`) en negras por defecto (1 beat); en *double time*, corcheas (0.5 beats).
 
 #### D. Volume y Velocity
 - **Velocity** (0-127): plano, un único valor por pista (`TrackConfig.velocity`).

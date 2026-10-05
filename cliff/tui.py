@@ -16,6 +16,7 @@ from .models import (
     SCALE_SLUGS,
     TICKS_PER_BEAT,
     TONIC_SLUGS,
+    CymbalEnum,
     DensityEnum,
     PadMode,
     PadRegister,
@@ -161,12 +162,16 @@ def _collect_config(console: Console) -> SongConfig:
         double_time = questionary.confirm(
             "¿Double time? (platos a corcheas y caja en 2 y 4)", default=False,
         ).ask()
+    cymbal = CymbalEnum(questionary.select(
+        "Plato", choices=[c.value for c in CymbalEnum],
+    ).ask())
 
     # Paso 4: Mezclador
     if questionary.confirm("¿Personalizar volumen y velocity de las pistas?", default=False).ask():
         track_configs = {}
         for label, key in (("Pad", "pad_config"), ("Bajo", "bass_config"),
-                           ("Arpegiador", "arp_config"), ("Percusión", "drums_config")):
+                           ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
+                           ("Percusión", "drums_config")):
             velocity = int(questionary.text(f"{label} — velocity (0-127)", default="100",
                                             validate=_int_range(0, 127)).ask())
             volume = int(questionary.text(f"{label} — volumen (0-100)", default="100",
@@ -174,10 +179,11 @@ def _collect_config(console: Console) -> SongConfig:
             track_configs[key] = TrackConfig(velocity=velocity, volume=volume)
         bass_config = track_configs["bass_config"]
         pad_config = track_configs["pad_config"]
+        guitar_config = track_configs["guitar_config"]
         arp_config = track_configs["arp_config"]
         drums_config = track_configs["drums_config"]
     else:
-        bass_config = pad_config = arp_config = drums_config = TrackConfig()
+        bass_config = pad_config = guitar_config = arp_config = drums_config = TrackConfig()
 
     # Paso 5: Lote
     variations = int(questionary.text("Variaciones a generar (1-5)", default="1",
@@ -198,8 +204,10 @@ def _collect_config(console: Console) -> SongConfig:
         bass_config=bass_config,
         pad_config=pad_config,
         arp_config=arp_config,
+        guitar_config=guitar_config,
         drums_config=drums_config,
         double_time=double_time,
+        cymbal=cymbal,
     )
     return config, variations
 

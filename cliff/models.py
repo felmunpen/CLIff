@@ -44,6 +44,15 @@ class TonicEnum(str, Enum):
     B = "B"
 
 
+class CymbalEnum(str, Enum):
+    """Plato (fuente del pulso) de la pista de percusión."""
+    OPEN_HI_HAT = "Hi-hat abierto"
+    CLOSED_HI_HAT = "Hi-hat cerrado"
+    RIDE = "Ride"
+    CRASH = "Crash"
+    CHINA = "China"
+
+
 TICKS_PER_BEAT = 480  # ppq usada por mido
 BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
 
@@ -112,6 +121,18 @@ TONIC_SLUGS: dict[TonicEnum, str] = {
 # Desplazamiento del Bajo respecto a la escala base (dos octavas abajo, -> C1).
 BASS_PITCH_OFFSET = -24
 
+# Desplazamiento de la Guitarra respecto al Bajo (una octava arriba, -> C2).
+GUITAR_PITCH_OFFSET = 12
+
+# Nota MIDI de cada plato en el mapa de percusión de General MIDI (canal 10).
+CYMBAL_PITCHES: dict[CymbalEnum, int] = {
+    CymbalEnum.OPEN_HI_HAT: 46,
+    CymbalEnum.CLOSED_HI_HAT: 42,
+    CymbalEnum.RIDE: 51,
+    CymbalEnum.CRASH: 49,
+    CymbalEnum.CHINA: 52,
+}
+
 # Slug por escala para nombres de archivo (ascii, sin espacios ni '_').
 SCALE_SLUGS: dict[ScaleEnum, str] = {
     ScaleEnum.MAJOR: "major",
@@ -150,8 +171,10 @@ class SongConfig:
     bass_config: TrackConfig = field(default_factory=TrackConfig)
     pad_config: TrackConfig = field(default_factory=TrackConfig)
     arp_config: TrackConfig = field(default_factory=TrackConfig)   # reservado (pista fantasma)
+    guitar_config: TrackConfig = field(default_factory=TrackConfig)
     drums_config: TrackConfig = field(default_factory=TrackConfig)
     double_time: bool = False           # platos a corcheas y caja en 2/4 (solo 4/4)
+    cymbal: CymbalEnum = CymbalEnum.OPEN_HI_HAT
 
 
 @dataclass
@@ -177,4 +200,5 @@ class SequenceData:
     pad_notes: list[NoteEvent]
     bass_notes: list[NoteEvent]
     arp_notes: list[NoteEvent]          # vacía en MVP (pista fantasma)
+    guitar_notes: list[NoteEvent]       # sigue al bajo una octava arriba
     percussion_notes: list[NoteEvent]

@@ -17,11 +17,12 @@ El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacke
 ## 3. Arquitectura Musical del MVP
 
 ### 3.1 Pistas y Asignaciones (Estándar General MIDI)
-CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se resta 1):
+CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se resta 1):
 1. **Pad (Canal 1):** Instrumento GM 89 (Pad 2 - Warm). Mantiene el sostén armónico.
 2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal, **dos octavas por debajo** de la escala base (tónica en octava grave, p. ej. C1).
 3. **Arpegiador (Canal 3):** Instrumento GM 80 (Square Lead). **Pista fantasma en el MVP** (presente pero sin notas, reservada para una feature futura).
-4. **Percusión (Canal 10):** Set estándar GM de percusión.
+4. **Guitarra (Canal 4):** Instrumento GM 29 (Overdriven Guitar). Duplica la línea del bajo **una octava por encima** (octava grave, p. ej. C2).
+5. **Percusión (Canal 10):** Set estándar GM de percusión.
 
 ### 3.2 El Motor de Polimetría (Lógica del Residuo)
 - **Métrica base:** 4/4 (Fijo en MVP).
@@ -51,16 +52,16 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
   - **Registro:** `Grave` (C3) o `Agudo` (C4).
 - **Percusión:**
   - Caja (Snare): Golpe estático en el **beat 3** de cada compás (por defecto). En modo *double time* (solo 4/4), golpea en los tiempos **2 y 4**.
-  - Hi-Hat: Pulsos constantes en **negras** (por defecto). En *double time*, en **corcheas**.
+  - Plato: Pulsos constantes en **negras** (por defecto). En *double time*, en **corcheas**. Configurable: hi-hat abierto (por defecto), hi-hat cerrado, ride, crash o china (notas GM 46/42/51/49/52).
   - Bombo (Kick): Clona exactamente los instantes de ataque (`Note On`) generados por la pista del Bajo para acentuar el polirritmo.
-  - **Double time:** opción y/n que solo se ofrece en 4/4. Convierte la caja a 2 y 4 y el hi-hat a corcheas (sensación el doble de rápida).
+  - **Double time:** opción y/n que solo se ofrece en 4/4. Convierte la caja a 2 y 4 y el plato a corcheas (sensación el doble de rápida).
 - **Dinámica:** *Velocity* plano (0-127) por pista y *volumen* de canal (0-100, emitido como CC7) por pista.
 - **Sin claqueta (count-in) en el MVP.**
 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
-3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta), Double time (y/n, solo 4/4).
+3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
 6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).

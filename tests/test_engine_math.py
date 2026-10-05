@@ -99,12 +99,12 @@ class TestPercussionDoubleTime(unittest.TestCase):
 
     def test_default_hat_quarters(self):
         notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100)
-        hats = [n for n in notes if n.pitch == 42]
+        hats = [n for n in notes if n.pitch == 46]
         self.assertEqual(len(hats), 2 * 4)
 
     def test_double_time_hat_eighths(self):
         notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100, double_time=True)
-        hats = [n for n in notes if n.pitch == 42]
+        hats = [n for n in notes if n.pitch == 46]
         self.assertEqual(len(hats), 2 * 8)
 
     def test_sequence_double_time(self):
@@ -115,6 +115,30 @@ class TestPercussionDoubleTime(unittest.TestCase):
         bar_ticks = 4 * TICKS
         self.assertEqual(len(snare), 16)
         self.assertTrue(all(n.start_tick % bar_ticks in (TICKS, 3 * TICKS) for n in snare))
+
+    def test_cymbal_pitch_override(self):
+        notes = engine_math.build_percussion_notes([], total_bars=1, velocity=100, cymbal_pitch=51)
+        ride = [n for n in notes if n.pitch == 51]
+        self.assertEqual(len(ride), 4)
+
+    def test_default_cymbal_open_hihat(self):
+        random.seed(7)
+        config = SongConfig(total_bars=2)
+        seq = engine_math.generate_sequence(config)
+        hats = [n for n in seq.percussion_notes if n.pitch == 46]
+        self.assertEqual(len(hats), 2 * 4)
+
+
+class TestGuitar(unittest.TestCase):
+    def test_follows_bass_one_octave_up(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0)
+        seq = engine_math.generate_sequence(config)
+        self.assertEqual(len(seq.guitar_notes), len(seq.bass_notes))
+        for g, b in zip(seq.guitar_notes, seq.bass_notes):
+            self.assertEqual(g.pitch, b.pitch + 12)
+            self.assertEqual(g.start_tick, b.start_tick)
+            self.assertEqual(g.duration_ticks, b.duration_ticks)
 
 
 if __name__ == "__main__":

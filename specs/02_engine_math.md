@@ -82,13 +82,17 @@
 
 #### C. Percusión
 - **Kick (36):** clona los tiempos absolutos de `Note On` del Bass.
-- **Snare (38):** beats 2 y 4 de cada compás (`bar_start + 480` y `bar_start + 1440` ticks).
-- **Hi-Hat (42):** corcheas constantes (cada 240 ticks).
+- **Snare (38):** beat 3 de cada compás por defecto (`bar_start + 960` ticks); en *double time*, beats 2 y 4 (`bar_start + 480` y `bar_start + 1440`).
+- **Plato:** negras por defecto (cada 480 ticks); en *double time*, corcheas (cada 240 ticks). Nota según `CYMBAL_PITCHES[cymbal]`.
 - Duración fija de los golpes (p.ej. 120 ticks).
 - `velocity` = `drums_config.velocity`.
 
 #### D. Arpeggiator
 - **Pista fantasma**: no se generan notas en el MVP (`arp_notes = []`).
+
+#### E. Guitarra
+- Duplica la línea del bajo **una octava por encima** (`pitch = bass.pitch + GUITAR_PITCH_OFFSET`, con `GUITAR_PITCH_OFFSET = 12`).
+- Mismo ritmo y duración que el bajo; `velocity` = `guitar_config.velocity`.
 
 ### 1.6 Orquestación
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
@@ -97,8 +101,8 @@
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
 3. Generar el riff y ensamblar `bass_notes`.
-4. Construir `pad_notes` y `percussion_notes`.
-5. Devolver `SequenceData` con el resumen (en beats) y las cuatro listas de notas
+4. Construir `pad_notes`, `guitar_notes` (transposición del bajo) y `percussion_notes` (con `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
+5. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
    (`arp_notes = []`).
 
 **Resumen (beats):**

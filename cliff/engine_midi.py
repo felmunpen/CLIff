@@ -49,11 +49,12 @@ def _note_track(name: str, channel: int, program, track_config, notes) -> mido.M
 
 
 def build_midi(config: SongConfig, sequence: SequenceData) -> mido.MidiFile:
-    """Construye el `MidiFile` con 4 pistas (Pad, Bass, Arpeggiator, Percussion)."""
+    """Construye el `MidiFile` con 5 pistas (Pad, Bass, Guitar, Arpeggiator, Percussion)."""
     mid = mido.MidiFile(ticks_per_beat=480)
     mid.tracks.append(_meta_track(config))
     mid.tracks.append(_note_track("Pad", 0, 89, config.pad_config, sequence.pad_notes))
     mid.tracks.append(_note_track("Bass", 1, 33, config.bass_config, sequence.bass_notes))
+    mid.tracks.append(_note_track("Guitar", 3, 29, config.guitar_config, sequence.guitar_notes))
     mid.tracks.append(_note_track("Arpeggiator", 2, 80, config.arp_config, sequence.arp_notes))
     mid.tracks.append(_note_track("Percussion", 9, None, config.drums_config, sequence.percussion_notes))
     return mid

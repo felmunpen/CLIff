@@ -10,11 +10,14 @@ import random
 from .models import (
     BASS_PITCH_OFFSET,
     BEATS_PER_BAR,
+    CYMBAL_PITCHES,
     DENSITY_RANGES,
+    GUITAR_PITCH_OFFSET,
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
     TICKS_PER_BEAT,
     TONIC_SEMITONES,
+    CymbalEnum,
     DensityEnum,
     NoteEvent,
     PadMode,
@@ -130,11 +133,12 @@ def build_pad_notes(scale_pitches, pad_mode, pad_register, total_ticks, pad_brea
     return notes
 
 
-def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False) -> list[NoteEvent]:
-    """Construye la percusión: kick (clona el bajo), snare y hi-hat.
+def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False,
+                           cymbal_pitch=CYMBAL_PITCHES[CymbalEnum.OPEN_HI_HAT]) -> list[NoteEvent]:
+    """Construye la percusión: kick (clona el bajo), snare y plato.
 
-    Por defecto: caja en el beat 3 y hi-hat en negras. En double time: caja en
-    beats 2 y 4 e hi-hat en corcheas. La colocación de la caja asume compás 4/4;
+    Por defecto: caja en el beat 3 y plato en negras. En double time: caja en
+    beats 2 y 4 y plato en corcheas. La colocación de la caja asume compás 4/4;
     si en el futuro se soportan otras métricas, habrá que generalizar esta
     lógica por compás.
     """
@@ -155,13 +159,22 @@ def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False) 
         else:
             notes.append(NoteEvent(pitch=38, start_tick=base + 2 * TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
 
-    # Hi-Hat: default -> negras; double time -> corcheas
+    # Plato: default -> negras; double time -> corcheas
     step = TICKS_PER_BEAT // 2 if double_time else TICKS_PER_BEAT
     for tick in range(0, total_bars * bar_ticks, step):
-        notes.append(NoteEvent(pitch=42, start_tick=tick, duration_ticks=hit_ticks, velocity=velocity))
+        notes.append(NoteEvent(pitch=cymbal_pitch, start_tick=tick, duration_ticks=hit_ticks, velocity=velocity))
 
     notes.sort(key=lambda n: n.start_tick)
     return notes
+
+
+def build_guitar_notes(bass_notes, velocity) -> list[NoteEvent]:
+    """Duplica la línea del bajo una octava por encima (C2) para la guitarra."""
+    return [
+        NoteEvent(pitch=n.pitch + GUITAR_PITCH_OFFSET,
+                  start_tick=n.start_tick, duration_ticks=n.duration_ticks, velocity=velocity)
+        for n in bass_notes
+    ]
 
 
 def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
@@ -200,8 +213,10 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         scale_pitches, config.pad_mode, config.pad_register, total_ticks,
         config.pad_breath_bars, config.pad_config.velocity,
     )
+    guitar_notes = build_guitar_notes(bass_notes, config.guitar_config.velocity)
     percussion_notes = build_percussion_notes(
         bass_notes, config.total_bars, config.drums_config.velocity, config.double_time,
+        CYMBAL_PITCHES[config.cymbal],
     )
 
     return SequenceData(
@@ -212,5 +227,6 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         pad_notes=pad_notes,
         bass_notes=bass_notes,
         arp_notes=[],
+        guitar_notes=guitar_notes,
         percussion_notes=percussion_notes,
     )

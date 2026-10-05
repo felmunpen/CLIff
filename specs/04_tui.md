@@ -21,10 +21,12 @@
    - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
    - `max_jump`: Slider/Int (1–5).
    - `density`: Select (`Baja`, `Media`, `Alta`).
+   - `cymbal`: Select (`Hi-hat abierto`, `Hi-hat cerrado`, `Ride`, `Crash`, `China`).
+   - `double_time`: Confirm y/n (solo 4/4) — plato a corcheas y caja en 2 y 4.
 5. **Paso 4: Mezclador**
    - Confirm `y/n`: "¿Personalizar volumen y velocity de las pistas?" (default No).
-   - Si **No**: se usan los valores por defecto (`velocity=100`, `volume=100`) en las 4 pistas.
-   - Si **Sí**, por cada pista (Pad, Bass, Arpeggiator, Percusión):
+   - Si **No**: se usan los valores por defecto (`velocity=100`, `volume=100`) en las 5 pistas.
+   - Si **Sí**, por cada pista (Pad, Bass, Guitarra, Arpeggiator, Percusión):
      - `velocity`: Int (0–127).
      - `volume`: Int (0–100).
 6. **Paso 5: Lote**

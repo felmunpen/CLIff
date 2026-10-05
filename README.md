@@ -12,14 +12,15 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 ## 🎵 Características Principales
 
 *   **Motor de Polimetría y Residuo:** Define la duración del patrón principal en *beats* asimétricos. CLIff repite el patrón y calcula un remate (*tail*) truncado para completar la métrica global sin descarrilar el compás.
-*   **4 Pistas Autogeneradas:**
+*   **5 Pistas Autogeneradas:**
     *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Agudo*.
     *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
+    *   **Guitarra:** Duplica la línea del bajo una octava por encima con overdrive (GM 29).
     *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
-    *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y los charles en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Incluye opción *double time* (caja en 2 y 4 y charles en corcheas).
+    *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y plato en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Plato configurable (hi-hat abierto/cerrado, ride, crash o china) y opción *double time* (caja en 2 y 4 y plato en corcheas).
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
-*   **Exportación Multipista:** Genera archivos `.mid` de 4 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
+*   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
 
 > **Nota (caso límite de densidad):** si la duración del patrón es menor que la menor duración permitida seleccionada (p. ej. patrón de `0.25` beats con solo la Negra habilitada), la combinación es infactible para el rango de densidad y la última nota se ajustará al resto exacto, pudiendo quedar fuera del pool de duraciones elegido. No se tratará por ahora.
@@ -76,7 +77,7 @@ Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
 2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
-3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta) y, solo en 4/4, si quieres activar el *double time*.
+3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).
 6.  **Generación:** Genera las piezas y, desde el resumen, usa **💾 Exportar** para guardar los archivos `.mid` en `/output` (o en la carpeta que elijas).
@@ -87,7 +88,7 @@ Flujo de uso en la terminal:
 
 Los archivos se guardan en `/output` con un nombre que combina tónica, escala, compás, BPM, fecha y un número de orden:
 
-*   `output/c_eolian_44_146bpm_05102026_1.mid` $\rightarrow$ Archivo MIDI multipista (4 pistas).
+*   `output/c_eolian_44_146bpm_05102026_1.mid` $\rightarrow$ Archivo MIDI multipista (5 pistas).
 
 El número final se incrementa automáticamente para no sobrescribir archivos anteriores del mismo día.
 
