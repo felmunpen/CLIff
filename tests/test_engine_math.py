@@ -79,5 +79,43 @@ class TestTonicTransposition(unittest.TestCase):
         self.assertEqual(seq.pad_notes[0].pitch, 52)
 
 
+class TestPercussionDoubleTime(unittest.TestCase):
+    def test_default_snare_beat_3(self):
+        notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100)
+        snare = [n.start_tick for n in notes if n.pitch == 38]
+        bar_ticks = 4 * TICKS
+        expected = [bar * bar_ticks + 2 * TICKS for bar in range(2)]
+        self.assertEqual(sorted(snare), expected)
+
+    def test_double_time_snare_2_and_4(self):
+        notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100, double_time=True)
+        snare = [n.start_tick for n in notes if n.pitch == 38]
+        bar_ticks = 4 * TICKS
+        expected = []
+        for bar in range(2):
+            base = bar * bar_ticks
+            expected += [base + TICKS, base + 3 * TICKS]
+        self.assertEqual(sorted(snare), expected)
+
+    def test_default_hat_quarters(self):
+        notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100)
+        hats = [n for n in notes if n.pitch == 42]
+        self.assertEqual(len(hats), 2 * 4)
+
+    def test_double_time_hat_eighths(self):
+        notes = engine_math.build_percussion_notes([], total_bars=2, velocity=100, double_time=True)
+        hats = [n for n in notes if n.pitch == 42]
+        self.assertEqual(len(hats), 2 * 8)
+
+    def test_sequence_double_time(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, double_time=True)
+        seq = engine_math.generate_sequence(config)
+        snare = [n for n in seq.percussion_notes if n.pitch == 38]
+        bar_ticks = 4 * TICKS
+        self.assertEqual(len(snare), 16)
+        self.assertTrue(all(n.start_tick % bar_ticks in (TICKS, 3 * TICKS) for n in snare))
+
+
 if __name__ == "__main__":
     unittest.main()

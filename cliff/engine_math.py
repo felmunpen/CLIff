@@ -130,8 +130,14 @@ def build_pad_notes(scale_pitches, pad_mode, pad_register, total_ticks, pad_brea
     return notes
 
 
-def build_percussion_notes(bass_notes, total_bars, velocity) -> list[NoteEvent]:
-    """Construye la percusión: kick (clona el bajo), snare (2 y 4) y hi-hat (corcheas)."""
+def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False) -> list[NoteEvent]:
+    """Construye la percusión: kick (clona el bajo), snare y hi-hat.
+
+    Por defecto: caja en el beat 3 y hi-hat en negras. En double time: caja en
+    beats 2 y 4 e hi-hat en corcheas. La colocación de la caja asume compás 4/4;
+    si en el futuro se soportan otras métricas, habrá que generalizar esta
+    lógica por compás.
+    """
     notes: list[NoteEvent] = []
     hit_ticks = 120  # duración fija de los golpes
 
@@ -139,15 +145,19 @@ def build_percussion_notes(bass_notes, total_bars, velocity) -> list[NoteEvent]:
     for b in bass_notes:
         notes.append(NoteEvent(pitch=36, start_tick=b.start_tick, duration_ticks=hit_ticks, velocity=velocity))
 
-    # Snare: beats 2 y 4 de cada compás
+    # Snare: default -> beat 3; double time -> beats 2 y 4
     bar_ticks = BEATS_PER_BAR * TICKS_PER_BEAT
     for bar in range(total_bars):
         base = bar * bar_ticks
-        notes.append(NoteEvent(pitch=38, start_tick=base + TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
-        notes.append(NoteEvent(pitch=38, start_tick=base + 3 * TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
+        if double_time:
+            notes.append(NoteEvent(pitch=38, start_tick=base + TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
+            notes.append(NoteEvent(pitch=38, start_tick=base + 3 * TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
+        else:
+            notes.append(NoteEvent(pitch=38, start_tick=base + 2 * TICKS_PER_BEAT, duration_ticks=hit_ticks, velocity=velocity))
 
-    # Hi-Hat: corcheas constantes
-    for tick in range(0, total_bars * bar_ticks, TICKS_PER_BEAT // 2):
+    # Hi-Hat: default -> negras; double time -> corcheas
+    step = TICKS_PER_BEAT // 2 if double_time else TICKS_PER_BEAT
+    for tick in range(0, total_bars * bar_ticks, step):
         notes.append(NoteEvent(pitch=42, start_tick=tick, duration_ticks=hit_ticks, velocity=velocity))
 
     notes.sort(key=lambda n: n.start_tick)
@@ -190,7 +200,9 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         scale_pitches, config.pad_mode, config.pad_register, total_ticks,
         config.pad_breath_bars, config.pad_config.velocity,
     )
-    percussion_notes = build_percussion_notes(bass_notes, config.total_bars, config.drums_config.velocity)
+    percussion_notes = build_percussion_notes(
+        bass_notes, config.total_bars, config.drums_config.velocity, config.double_time,
+    )
 
     return SequenceData(
         total_beats=config.total_bars * BEATS_PER_BAR,

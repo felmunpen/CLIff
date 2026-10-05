@@ -154,6 +154,13 @@ def _collect_config(console: Console) -> SongConfig:
     density = DensityEnum(questionary.select(
         "Densidad", choices=[d.value for d in DensityEnum],
     ).ask())
+    # Double time solo tiene sentido en 4/4 (caja en 2 y 4). Guardado para
+    # cuando el compás sea configurable.
+    double_time = False
+    if BEATS_PER_BAR == 4:
+        double_time = questionary.confirm(
+            "¿Double time? (platos a corcheas y caja en 2 y 4)", default=False,
+        ).ask()
 
     # Paso 4: Mezclador
     if questionary.confirm("¿Personalizar volumen y velocity de las pistas?", default=False).ask():
@@ -192,6 +199,7 @@ def _collect_config(console: Console) -> SongConfig:
         pad_config=pad_config,
         arp_config=arp_config,
         drums_config=drums_config,
+        double_time=double_time,
     )
     return config, variations
 

@@ -151,6 +151,7 @@ class SongConfig:
     pad_config: TrackConfig = field(default_factory=TrackConfig)
     arp_config: TrackConfig = field(default_factory=TrackConfig)   # reservado (pista fantasma)
     drums_config: TrackConfig = field(default_factory=TrackConfig)
+    double_time: bool = False           # platos a corcheas y caja en 2/4 (solo 4/4)
 
 
 @dataclass

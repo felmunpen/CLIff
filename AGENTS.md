@@ -50,16 +50,17 @@ CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se 
   - **Modo:** `Mono` (tónica) o `Acorde` (grados 1-3-5 de la escala).
   - **Registro:** `Grave` (C3) o `Agudo` (C4).
 - **Percusión:**
-  - Caja (Snare): Golpe estático en los tiempos 2 y 4 de cada compás.
-  - Hi-Hat: Pulsos constantes en corcheas.
+  - Caja (Snare): Golpe estático en el **beat 3** de cada compás (por defecto). En modo *double time* (solo 4/4), golpea en los tiempos **2 y 4**.
+  - Hi-Hat: Pulsos constantes en **negras** (por defecto). En *double time*, en **corcheas**.
   - Bombo (Kick): Clona exactamente los instantes de ataque (`Note On`) generados por la pista del Bajo para acentuar el polirritmo.
+  - **Double time:** opción y/n que solo se ofrece en 4/4. Convierte la caja a 2 y 4 y el hi-hat a corcheas (sensación el doble de rápida).
 - **Dinámica:** *Velocity* plano (0-127) por pista y *volumen* de canal (0-100, emitido como CC7) por pista.
 - **Sin claqueta (count-in) en el MVP.**
 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
-3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta).
+3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta), Double time (y/n, solo 4/4).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
 6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).
