@@ -10,7 +10,7 @@ En código (`mido` es 0-indexado) se resta 1: `canal_mido = canal_gm - 1`.
 | Pista | Canal GM | Canal mido | Instrumento GM | Notas / Función |
 | :--- | :--- | :--- | :--- | :--- |
 | **Pad** | 1 | 0 | GM 89 (Warm Pad) | Acorde de tónica o nota única; Drone |
-| **Bass** | 2 | 1 | GM 33 (Finger Bass) | Riff melódico (patrón principal) |
+| **Bass** | 2 | 1 | GM 33 (Finger Bass) | Riff melódico (patrón principal), dos octavas por debajo de la escala base |
 | **Arpeggiator** | 3 | 2 | GM 80 (Square Lead) | Pista fantasma (vacía en MVP) |
 | **Percussion** | 10 | 9 | Set estándar de percusión | Snare (38), HiHat (42), Kick (36) |
 

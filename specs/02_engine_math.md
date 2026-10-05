@@ -68,7 +68,7 @@
 ### 1.5 Construcción de las Pistas
 
 #### A. Bass (línea melódica principal)
-- Pitch por nota: `SCALE_PITCHES[scale][indice]`.
+- Pitch por nota: `SCALE_PITCHES[scale][indice] + BASS_PITCH_OFFSET` (dos octavas abajo, -> C1).
 - Se combina el riff con el ritmo expandido (ciclos completos + tail).
 - `velocity` = `bass_config.velocity` (plano).
 

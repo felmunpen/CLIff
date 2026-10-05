@@ -19,7 +19,7 @@ El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacke
 ### 3.1 Pistas y Asignaciones (Estándar General MIDI)
 CLIff genera siempre 4 pistas (canales en notación GM 1-indexada; en `mido` se resta 1):
 1. **Pad (Canal 1):** Instrumento GM 89 (Pad 2 - Warm). Mantiene el sostén armónico.
-2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal.
+2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal, **dos octavas por debajo** de la escala base (tónica C1).
 3. **Arpegiador (Canal 3):** Instrumento GM 80 (Square Lead). **Pista fantasma en el MVP** (presente pero sin notas, reservada para una feature futura).
 4. **Percusión (Canal 10):** Set estándar GM de percusión.
 

@@ -66,6 +66,9 @@ SCALE_PITCHES: dict[ScaleEnum, list[int]] = {
 # Tónica fija en el MVP (C = Do). Futura configurabilidad (podrá incluir # o b).
 TONIC = "c"
 
+# Desplazamiento del Bajo respecto a la escala base (dos octavas abajo, -> C1).
+BASS_PITCH_OFFSET = -24
+
 # Slug por escala para nombres de archivo (ascii, sin espacios ni '_').
 SCALE_SLUGS: dict[ScaleEnum, str] = {
     ScaleEnum.MAJOR: "major",

@@ -22,6 +22,8 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 *   **Exportación Multipista:** Genera archivos `.mid` de 4 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
 
+> **Nota (caso límite de densidad):** si la duración del patrón es menor que la menor duración permitida seleccionada (p. ej. patrón de `0.25` beats con solo la Negra habilitada), la combinación es infactible para el rango de densidad y la última nota se ajustará al resto exacto, pudiendo quedar fuera del pool de duraciones elegido. No se tratará por ahora.
+
 ---
 
 ## 🧩 ¿Cómo Funciona la Polimetría en CLIff?

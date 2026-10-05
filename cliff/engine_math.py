@@ -8,6 +8,7 @@ import math
 import random
 
 from .models import (
+    BASS_PITCH_OFFSET,
     BEATS_PER_BAR,
     DENSITY_RANGES,
     PAD_REGISTER_OFFSET,
@@ -92,15 +93,15 @@ def build_bass_notes(pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, 
     for loop in range(full_loops):
         start = loop * pattern_ticks
         for i, dur in enumerate(pattern_rhythm_ticks):
-            notes.append(NoteEvent(pitch=scale_pitches[riff[i]], start_tick=start,
-                                   duration_ticks=dur, velocity=velocity))
+            notes.append(NoteEvent(pitch=scale_pitches[riff[i]] + BASS_PITCH_OFFSET,
+                                   start_tick=start, duration_ticks=dur, velocity=velocity))
             start += dur
     # tail
     if tail_rhythm_ticks:
         start = full_loops * pattern_ticks
         for i, dur in enumerate(tail_rhythm_ticks):
-            notes.append(NoteEvent(pitch=scale_pitches[riff[i]], start_tick=start,
-                                   duration_ticks=dur, velocity=velocity))
+            notes.append(NoteEvent(pitch=scale_pitches[riff[i]] + BASS_PITCH_OFFSET,
+                                   start_tick=start, duration_ticks=dur, velocity=velocity))
             start += dur
     return notes
 

@@ -35,6 +35,7 @@ class PadRegister(str, Enum):
 TICKS_PER_BEAT = 480  # ppq usada por mido
 BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
 TONIC = "c"           # tónica fija en el MVP (Do); futura configurabilidad (#/b)
+BASS_PITCH_OFFSET = -24  # bajo dos octavas por debajo de la escala base (-> C1)
 
 # Opciones de duración rítmica disponibles en la TUI (nombre, beats)
 DURATION_OPTIONS: list[tuple[str, float]] = [
