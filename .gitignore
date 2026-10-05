@@ -10,3 +10,6 @@ output/
 
 # Configuración de agentes
 .agents/
+
+# Otras utilidades
+extras/
