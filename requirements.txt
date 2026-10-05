@@ -6,6 +6,3 @@ questionary>=2.0.1
 
 # Generación y Manipulación MIDI
 mido>=1.3.2
-
-# Nota: FluidSynth se usa vía subprocess (binario del sistema), no como dependencia pip.
-# Instalarlo aparte (prerrequisito del sistema): https://github.com/FluidSynth/fluidsynth

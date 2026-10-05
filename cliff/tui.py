@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from . import engine_audio, engine_midi, engine_math
+from . import engine_midi, engine_math
 from .models import (
     DURATION_OPTIONS,
     DensityEnum,
@@ -20,7 +20,6 @@ from .models import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SF2 = PROJECT_ROOT / "assets" / "default.sf2"
 DEFAULT_OUTPUT = PROJECT_ROOT / "output"
 
 
@@ -144,52 +143,24 @@ def _pattern_str(pattern_beats: float) -> str:
     return str(int(pattern_beats)) if pattern_beats.is_integer() else str(pattern_beats)
 
 
-def _ensure_wav(midi, tmpdir: str, console: Console):
-    """Renderiza (y cachea) el WAV de preescucha en el directorio temporal."""
-    wav_tmp = os.path.join(tmpdir, "current.wav")
-    if os.path.exists(wav_tmp):
-        return wav_tmp
-    if not DEFAULT_SF2.exists():
-        console.print(f"[yellow]No se encontró {DEFAULT_SF2}; no se puede preescuchar.[/yellow]")
-        return None
-    midi_tmp = os.path.join(tmpdir, "current.mid")
-    midi.save(midi_tmp)
-    if not engine_audio.render_midi_to_wav(midi_tmp, str(DEFAULT_SF2), wav_tmp):
-        console.print("[red]Error al renderizar el audio (¿FluidSynth instalado?).[/red]")
-        return None
-    return wav_tmp
-
-
 def _export(console: Console, config: SongConfig, midi) -> None:
     out_dir = questionary.text("Carpeta de exportación", default=str(DEFAULT_OUTPUT)).ask()
     os.makedirs(out_dir, exist_ok=True)
     base = f"cliff_{config.bpm}bpm_p{_pattern_str(config.pattern_beats)}"
     midi_path = os.path.join(out_dir, base + ".mid")
-    wav_path = os.path.join(out_dir, base + ".wav")
     midi.save(midi_path)
     console.print(f"[green]Exportado:[/green] {midi_path}")
-    if DEFAULT_SF2.exists():
-        if engine_audio.render_midi_to_wav(midi_path, str(DEFAULT_SF2), wav_path):
-            console.print(f"[green]Exportado:[/green] {wav_path}")
-        else:
-            console.print("[yellow]No se pudo renderizar el WAV (¿FluidSynth instalado?).[/yellow]")
-    else:
-        console.print(f"[yellow]No se encontró {DEFAULT_SF2}; WAV no renderizado.[/yellow]")
 
 
-def _result_screen(console: Console, config: SongConfig, seq, midi, tmpdir: str) -> str:
+def _result_screen(console: Console, config: SongConfig, seq, midi) -> str:
     """Muestra el resumen y las acciones. Devuelve 'back' o 'quit'."""
     _show_summary(console, seq)
     while True:
         action = questionary.select(
             "Acción",
-            choices=["▶ Play", "💾 Exportar", "↩ Volver", "✕ Salir"],
+            choices=["💾 Exportar", "↩ Volver", "✕ Salir"],
         ).ask()
-        if action == "▶ Play":
-            wav = _ensure_wav(midi, tmpdir, console)
-            if wav:
-                engine_audio.play_audio(wav)
-        elif action == "💾 Exportar":
+        if action == "💾 Exportar":
             _export(console, config, midi)
         elif action == "↩ Volver":
             return "back"
@@ -197,15 +168,15 @@ def _result_screen(console: Console, config: SongConfig, seq, midi, tmpdir: str)
             return "quit"
 
 
-def run(tmpdir: str) -> None:
-    """Punto de entrada de la TUI. `tmpdir` es el directorio temporal de trabajo."""
+def run() -> None:
+    """Punto de entrada de la TUI."""
     console = Console()
     _show_header(console)
     while True:
         config = _collect_config(console)
         sequence = engine_math.generate_sequence(config)
         midi = engine_midi.build_midi(config, sequence)
-        result = _result_screen(console, config, sequence, midi, tmpdir)
+        result = _result_screen(console, config, sequence, midi)
         if result == "quit":
             console.print("[cyan]¡Hasta pronto![/cyan]")
             break

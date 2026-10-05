@@ -7,7 +7,6 @@ venv/
 # Archivos generados en tiempo de ejecución
 output/
 *.mid
-*.wav
 
 # Configuración de agentes
 .agents/
