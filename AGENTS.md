@@ -72,6 +72,10 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - **Estética Terminal:** Utilizar `rich` para formatear paneles de estado, barras de progreso y tablas con la estructura polirrítmica calculada.
 - **Precisión Matemática:** Garantizar que los tiempos acumulados de los eventos MIDI no sufran desviaciones por redondeo (se trabaja en ticks enteros).
 
+## 6. Próximo Trabajo (Siguiente Sesión)
+
+- Hacer que la pieza dure **N veces** (2 por defecto): repetir la estructura completa (ciclos completos + tail) para poder observar el efecto del truncamiento en el tail.
+
 ---
 
 ## Control de versiones

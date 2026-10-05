@@ -96,6 +96,8 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 
 ## 🗺️ Feature Futuras (Roadmap)
 
+> **Próximo (próxima sesión):** hacer que la pieza dure **N veces** (2 por defecto), repitiendo la estructura completa (ciclos + tail) para poder observar el efecto del truncamiento en el tail.
+
 1. Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos.
 2. Algoritmos de variación dinámica de *velocity* y silencios rítmicos.
 3. Grados negativos por debajo de la tónica principal en el bajo.
