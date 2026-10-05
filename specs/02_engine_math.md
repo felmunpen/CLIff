@@ -31,11 +31,12 @@
 **Salida:** lista de duraciones en ticks cuya suma es exactamente `pattern_ticks`.
 
 ### 1.3 Bucle de Polimetría y Cálculo del Tail
-**Cálculo:**
-- `total_ticks = total_bars * 4 * TICKS_PER_BEAT`
-- `pattern_ticks = sum(pattern_rhythm_ticks)`
-- `full_loops = total_ticks // pattern_ticks`
-- `tail_ticks = total_ticks % pattern_ticks`
+
+**Función pura:** `polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]`
+- `total_ticks = total_bars * BEATS_PER_BAR * TICKS_PER_BEAT`
+- `pattern_ticks = beats_to_ticks(pattern_beats)`
+- Devuelve `(full_loops, tail_ticks) = (total_ticks // pattern_ticks, total_ticks % pattern_ticks)`.
+- Es la **fuente única de verdad** del residuo; la usan `generate_sequence` y la TUI (previsualización).
 
 **Función:** `build_tail_rhythm(pattern_rhythm_ticks, tail_ticks) -> list[int]`
 - Recorrer `pattern_rhythm_ticks` desde el inicio, acumulando duraciones **hasta** que la siguiente exceda `tail_ticks`.
@@ -93,7 +94,7 @@
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
 
 1. Resolver densidad y generar el patrón rítmico.
-2. Calcular `full_loops` y `tail_ticks`; construir el tail.
+2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
 3. Generar el riff y ensamblar `bass_notes`.
 4. Construir `pad_notes` y `percussion_notes`.
 5. Devolver `SequenceData` con el resumen (en beats) y las cuatro listas de notas

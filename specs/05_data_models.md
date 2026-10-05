@@ -33,6 +33,7 @@ class PadRegister(str, Enum):
 
 ```python
 TICKS_PER_BEAT = 480  # ppq usada por mido
+BEATS_PER_BAR = 4     # métrica por compás (4/4 fija en el MVP; futura configurabilidad)
 
 # Opciones de duración rítmica disponibles en la TUI (nombre, beats)
 DURATION_OPTIONS: list[tuple[str, float]] = [

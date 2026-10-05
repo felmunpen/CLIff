@@ -25,7 +25,32 @@
 6. **Paso 5: Generar**
    - Al confirmar, se ejecuta `engine_math` + `engine_midi` (MIDI en memoria).
 
-### 1.2 Vista de Resultados (`rich.table`)
+### 1.2 Previsualización de Polimetría (`rich`)
+
+Tras completar el **Paso 2** (cuando ya se conocen `total_bars` y `pattern_beats`),
+la TUI muestra una previsualización calculada con `engine_math.polymetry_summary`:
+
+1. **Total de beats:** `total_bars × BEATS_PER_BAR` (con su equivalencia en compases).
+2. **Mapa gráfico:** una barra de bloques que representa la pieza completa:
+   - Los **ciclos completos** del patrón se dibujan en **cian**.
+   - El **tail** final se dibuja en **amarillo**.
+   - **Separación:** los bloques se separan con un espacio simple (sin corchetes).
+   - **Resolución:** 1 bloque = 1 beat. Cuando `pattern_beats` o el tail tienen
+     fracciones de cuarto (0.25/0.5/0.75), se usa resolución de semicorchea
+     (0.25 beat = 1 bloque) para que todos los segmentos tengan longitud entera.
+   - **Escalado:** si la barra supera ~60 bloques, se reduce proporcionalmente
+     (manteniendo las proporciones) para caber en el ancho de la terminal.
+3. **Leyenda:** "N ciclos completos + tail de M beats".
+
+Ejemplo (8 compases en 4/4, patrón de 7 beats):
+
+```text
+32 beats totales (8 compases × 4)
+███████ ███████ ███████ ███████ ████
+4 ciclos completos + tail de 4 beats
+```
+
+### 1.3 Vista de Resultados (`rich.table`)
 
 Tras generar, se muestra el desglose matemático y las acciones disponibles:
 
