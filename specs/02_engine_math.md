@@ -70,6 +70,8 @@
 #### A. Bass (línea melódica principal)
 - Pitch por nota: `SCALE_PITCHES[scale][indice] + TONIC_SEMITONES[tonic] + BASS_PITCH_OFFSET` (dos octavas abajo de la escala transpuesta).
 - Se combina el riff con el ritmo expandido (ciclos completos + tail).
+- La **estructura** (ciclos completos + tail) se construye una sola vez y luego se repite
+  `repetitions` veces mediante `tile_notes` (el riff resetea a tónica en cada estructura).
 - `velocity` = `bass_config.velocity` (plano).
 
 #### B. Pad
@@ -94,19 +96,30 @@
 - Duplica la línea del bajo **una octava por encima** (`pitch = bass.pitch + GUITAR_PITCH_OFFSET`, con `GUITAR_PITCH_OFFSET = 12`).
 - Mismo ritmo y duración que el bajo; `velocity` = `guitar_config.velocity`.
 
+#### F. Repetición de la estructura
+**Función:** `tile_notes(notes, repetitions, structure_ticks) -> list[NoteEvent]`
+- Repite una lista de notas (una estructura) `repetitions` veces, sumando
+  `structure_ticks` al `start_tick` de cada copia.
+- `structure_ticks` = `total_bars * BEATS_PER_BAR * TICKS_PER_BEAT` (longitud de una estructura).
+- Si `repetitions <= 1`, devuelve la lista original sin cambios.
+
 ### 1.6 Orquestación
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
 
 0. Transponer la escala según la tónica: `scale_pitches = [p + TONIC_SEMITONES[tonic] for p in SCALE_PITCHES[scale]]`.
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
-3. Generar el riff y ensamblar `bass_notes`.
-4. Construir `pad_notes`, `guitar_notes` (transposición del bajo) y `percussion_notes` (con `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
-5. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
+3. Generar el riff y ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
+4. Repetir la estructura: `bass_notes = tile_notes(bass_structure, repetitions, total_ticks)`.
+5. Construir `pad_notes` (sobre `total_ticks * repetitions`), `guitar_notes` (transposición del
+   bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con
+   `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
+6. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
    (`arp_notes = []`).
 
 **Resumen (beats):**
-- `total_beats = total_bars * 4.0`
+- `total_beats = total_bars * 4.0 * repetitions`
 - `pattern_beats = config.pattern_beats`
-- `full_loops` (entero)
+- `full_loops` (entero, por estructura)
 - `tail_beats = tail_ticks / TICKS_PER_BEAT`
+- `repetitions = config.repetitions`

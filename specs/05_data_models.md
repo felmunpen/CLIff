@@ -136,6 +136,7 @@ class TrackConfig:
 class SongConfig:
     bpm: int = 120
     total_bars: int = 8
+    repetitions: int = 2                # nº de veces que se repite la estructura (ciclos + tail)
     pattern_beats: float = 7.0
     pad_breath_bars: int = 0            # 0 = Drone Infinito; 1-8 = re-disparo
     tonic: TonicEnum = TonicEnum.C      # nota central (tónica)
@@ -172,6 +173,7 @@ class SequenceData:
     pattern_beats: float
     full_loops: int
     tail_beats: float
+    repetitions: int                    # veces que se repite la estructura completa
     pad_notes: list[NoteEvent]
     bass_notes: list[NoteEvent]
     arp_notes: list[NoteEvent]          # vacía en MVP (pista fantasma)
@@ -185,6 +187,7 @@ class SequenceData:
 | :--- | :--- |
 | `bpm` | Entero, 40–240 |
 | `total_bars` | Entero, 4–64 |
+| `repetitions` | Entero, 1–8 (`1` = estructura única) |
 | `pattern_beats` | Múltiplo de la menor duración permitida (0.25 = 120 ticks) |
 | `pad_breath_bars` | Entero, 0–8 (`0` = Drone Infinito) |
 | `max_jump` | Entero, 1–5 |

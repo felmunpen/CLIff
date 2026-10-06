@@ -12,6 +12,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 ## 🎵 Características Principales
 
 *   **Motor de Polimetría y Residuo:** Define la duración del patrón principal en *beats* asimétricos. CLIff repite el patrón y calcula un remate (*tail*) truncado para completar la métrica global sin descarrilar el compás.
+*   **Repetición de la Estructura:** Repite la estructura completa (ciclos + tail) **N veces** (2 por defecto) para poder observar el efecto del truncamiento del residuo al reiniciar cada estructura en la tónica.
 *   **5 Pistas Autogeneradas:**
     *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Agudo*.
     *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
@@ -75,7 +76,7 @@ python main.py
 
 Flujo de uso en la terminal:
 
-1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
+1.  **Ajustes Globales:** Introduce el tempo (BPM), la cantidad de compases y el número de repeticiones de la estructura completa.
 2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
 3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
@@ -95,8 +96,6 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 ---
 
 ## 🗺️ Feature Futuras (Roadmap)
-
-> **Próximo (próxima sesión):** hacer que la pieza dure **N veces** (2 por defecto), repitiendo la estructura completa (ciclos + tail) para poder observar el efecto del truncamiento en el tail.
 
 1. Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos.
 2. Algoritmos de variación dinámica de *velocity* y silencios rítmicos.

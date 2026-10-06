@@ -177,6 +177,20 @@ def build_guitar_notes(bass_notes, velocity) -> list[NoteEvent]:
     ]
 
 
+def tile_notes(notes: list[NoteEvent], repetitions: int, structure_ticks: int) -> list[NoteEvent]:
+    """Repite una estructura (lista de notas) `repetitions` veces, desplazando cada
+    copia `structure_ticks` ticks. Devuelve la misma lista si `repetitions == 1`."""
+    if repetitions <= 1:
+        return notes
+    result: list[NoteEvent] = []
+    for r in range(repetitions):
+        offset = r * structure_ticks
+        for n in notes:
+            result.append(NoteEvent(pitch=n.pitch, start_tick=n.start_tick + offset,
+                                    duration_ticks=n.duration_ticks, velocity=n.velocity))
+    return result
+
+
 def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
     """Devuelve (full_loops, tail_ticks) en ticks enteros.
 
@@ -192,7 +206,8 @@ def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
 
 def generate_sequence(config: SongConfig) -> SequenceData:
     """Orquesta el cálculo completo y devuelve un `SequenceData`."""
-    total_ticks = config.total_bars * BEATS_PER_BAR * TICKS_PER_BEAT
+    total_ticks = config.total_bars * BEATS_PER_BAR * TICKS_PER_BEAT  # una estructura
+    piece_ticks = total_ticks * config.repetitions
     allowed_ticks = [beats_to_ticks(d) for d in config.allowed_durations]
     pattern_ticks = beats_to_ticks(config.pattern_beats)
 
@@ -205,25 +220,27 @@ def generate_sequence(config: SongConfig) -> SequenceData:
     scale_pitches = [p + TONIC_SEMITONES[config.tonic] for p in SCALE_PITCHES[config.scale]]
     riff = generate_melody_indices(len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches))
 
-    bass_notes = build_bass_notes(
+    bass_structure = build_bass_notes(
         pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, pattern_ticks,
         scale_pitches, config.bass_config.velocity,
     )
+    bass_notes = tile_notes(bass_structure, config.repetitions, total_ticks)
     pad_notes = build_pad_notes(
-        scale_pitches, config.pad_mode, config.pad_register, total_ticks,
+        scale_pitches, config.pad_mode, config.pad_register, piece_ticks,
         config.pad_breath_bars, config.pad_config.velocity,
     )
     guitar_notes = build_guitar_notes(bass_notes, config.guitar_config.velocity)
     percussion_notes = build_percussion_notes(
-        bass_notes, config.total_bars, config.drums_config.velocity, config.double_time,
-        CYMBAL_PITCHES[config.cymbal],
+        bass_notes, config.total_bars * config.repetitions, config.drums_config.velocity,
+        config.double_time, CYMBAL_PITCHES[config.cymbal],
     )
 
     return SequenceData(
-        total_beats=config.total_bars * BEATS_PER_BAR,
+        total_beats=config.total_bars * BEATS_PER_BAR * config.repetitions,
         pattern_beats=config.pattern_beats,
         full_loops=full_loops,
         tail_beats=tail_ticks / TICKS_PER_BEAT,
+        repetitions=config.repetitions,
         pad_notes=pad_notes,
         bass_notes=bass_notes,
         arp_notes=[],

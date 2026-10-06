@@ -38,7 +38,8 @@ class TestSequence(unittest.TestCase):
         config = SongConfig(total_bars=8, pattern_beats=7.0)
         seq = engine_math.generate_sequence(config)
         total_ticks = config.total_bars * 4 * TICKS
-        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), total_ticks)
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes),
+                         total_ticks * config.repetitions)
 
     def test_polymetry_summary(self):
         random.seed(7)
@@ -52,7 +53,7 @@ class TestSequence(unittest.TestCase):
         random.seed(7)
         config = SongConfig(pad_breath_bars=0, pad_mode="Acorde")
         seq = engine_math.generate_sequence(config)
-        total_ticks = config.total_bars * 4 * TICKS
+        total_ticks = config.total_bars * 4 * TICKS * config.repetitions
         # acorde de 3 notas sostenido durante toda la pieza
         self.assertEqual(len(seq.pad_notes), 3)
         self.assertTrue(all(n.start_tick == 0 and n.duration_ticks == total_ticks for n in seq.pad_notes))
@@ -113,7 +114,7 @@ class TestPercussionDoubleTime(unittest.TestCase):
         seq = engine_math.generate_sequence(config)
         snare = [n for n in seq.percussion_notes if n.pitch == 38]
         bar_ticks = 4 * TICKS
-        self.assertEqual(len(snare), 16)
+        self.assertEqual(len(snare), 16 * config.repetitions)
         self.assertTrue(all(n.start_tick % bar_ticks in (TICKS, 3 * TICKS) for n in snare))
 
     def test_cymbal_pitch_override(self):
@@ -126,7 +127,7 @@ class TestPercussionDoubleTime(unittest.TestCase):
         config = SongConfig(total_bars=2)
         seq = engine_math.generate_sequence(config)
         hats = [n for n in seq.percussion_notes if n.pitch == 46]
-        self.assertEqual(len(hats), 2 * 4)
+        self.assertEqual(len(hats), 2 * 4 * config.repetitions)
 
 
 class TestGuitar(unittest.TestCase):
@@ -139,6 +140,47 @@ class TestGuitar(unittest.TestCase):
             self.assertEqual(g.pitch, b.pitch + 12)
             self.assertEqual(g.start_tick, b.start_tick)
             self.assertEqual(g.duration_ticks, b.duration_ticks)
+
+
+class TestRepetitions(unittest.TestCase):
+    def test_bass_total_is_n_times_structure(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=3)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), structure_ticks * 3)
+
+    def test_structure_resets_to_tonic(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        first_pitch = seq.bass_notes[0].pitch
+        second_starts = [n for n in seq.bass_notes if n.start_tick == structure_ticks]
+        self.assertTrue(second_starts)
+        self.assertTrue(all(n.pitch == first_pitch for n in second_starts))
+
+    def test_percussion_spans_all_bars(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, pattern_beats=7.0, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        snare = [n for n in seq.percussion_notes if n.pitch == 38]
+        self.assertEqual(len(snare), 4 * 2)  # 4 compases × 2 repeticiones
+
+    def test_pad_drone_spans_full_piece(self):
+        random.seed(7)
+        config = SongConfig(pad_breath_bars=0, pad_mode="Mono", repetitions=3)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(len(seq.pad_notes), 1)
+        self.assertEqual(seq.pad_notes[0].duration_ticks, structure_ticks * 3)
+
+    def test_repetitions_one_is_single_structure(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), structure_ticks)
 
 
 if __name__ == "__main__":

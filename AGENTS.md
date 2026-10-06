@@ -74,7 +74,8 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 
 ## 6. Próximo Trabajo (Siguiente Sesión)
 
-- Hacer que la pieza dure **N veces** (2 por defecto): repetir la estructura completa (ciclos completos + tail) para poder observar el efecto del truncamiento en el tail.
+- ~~Hacer que la pieza dure N veces (2 por defecto)~~ — **completado**.
+- Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
 
 ---
 
