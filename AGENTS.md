@@ -75,6 +75,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 ## 6. Próximo Trabajo (Siguiente Sesión)
 
 - ~~Hacer que la pieza dure N veces (2 por defecto)~~ — **completado**.
+- **Inminente:** profundizar en el sesgo de la nota final del patrón (`generate_rhythm_pattern`): la última nota absorbe todo el sobrante y tiende a ser la más larga — decidir entre repartir el sobrante o aprovecharlo como gesto intencionado.
 - Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
 - Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
 - Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).
