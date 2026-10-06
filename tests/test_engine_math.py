@@ -4,7 +4,7 @@ import random
 import unittest
 
 from cliff import engine_math
-from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, beats_to_ticks
+from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, TonicRecurrence, beats_to_ticks
 
 TICKS = 480
 
@@ -181,6 +181,46 @@ class TestRepetitions(unittest.TestCase):
         seq = engine_math.generate_sequence(config)
         structure_ticks = config.total_bars * 4 * TICKS
         self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), structure_ticks)
+
+
+class TestTonicRecurrence(unittest.TestCase):
+    def test_full_probability_forces_all_tonics(self):
+        random.seed(1)
+        indices = engine_math.generate_melody_indices(8, 3, 15, tonic_prob=1.0)
+        self.assertEqual(indices, [0] * 8)
+
+    def test_zero_probability_is_pure_walk(self):
+        random.seed(12345)
+        indices = engine_math.generate_melody_indices(6, 3, 15, tonic_prob=0.0)
+        self.assertEqual(indices, [0, 3, 5, 4, 1, 0])
+
+    def test_monotonic_tonic_count(self):
+        counts = []
+        for p in (0.0, 0.45, 1.0):
+            random.seed(12345)
+            indices = engine_math.generate_melody_indices(6, 3, 15, tonic_prob=p)
+            counts.append(sum(1 for i in indices if i == 0))
+        self.assertEqual(counts, sorted(counts))  # no decrece
+        self.assertEqual(counts[-1], 6)           # p=1.0 -> todas tónicas
+
+    def test_first_note_always_tonic_and_in_bounds(self):
+        for p in (0.0, 0.25, 0.45, 1.0):
+            random.seed(9)
+            indices = engine_math.generate_melody_indices(10, 5, 15, tonic_prob=p)
+            self.assertEqual(indices[0], 0)
+            self.assertTrue(all(0 <= i < 15 for i in indices))
+
+    def test_recurrence_increases_tonics(self):
+        # Mismo seed: el walk subyacente es idéntico, solo cambia la sobreescritura.
+        random.seed(7)
+        libre = engine_math.generate_sequence(SongConfig(tonic_recurrence=TonicRecurrence.LIBRE))
+        random.seed(7)
+        high = engine_math.generate_sequence(SongConfig(tonic_recurrence=TonicRecurrence.HIGH))
+        self.assertEqual(len(libre.bass_notes), len(high.bass_notes))
+        tonic_pitch = libre.bass_notes[0].pitch  # la tónica (índice 0)
+        libre_tonics = sum(1 for n in libre.bass_notes if n.pitch == tonic_pitch)
+        high_tonics = sum(1 for n in high.bass_notes if n.pitch == tonic_pitch)
+        self.assertGreaterEqual(high_tonics, libre_tonics)
 
 
 if __name__ == "__main__":

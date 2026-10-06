@@ -19,6 +19,13 @@ class DensityEnum(str, Enum):
     MEDIUM = "Media"
     HIGH = "Alta"
 
+class TonicRecurrence(str, Enum):
+    """Recurrencia de la tónica en el riff (probabilidad de que una nota se convierta en tónica)."""
+    LIBRE = "Libre"
+    LOW = "Baja"
+    MEDIUM = "Media"
+    HIGH = "Alta"
+
 class PadMode(str, Enum):
     MONO = "Mono"
     CHORD = "Acorde"
@@ -96,6 +103,14 @@ DENSITY_RANGES: dict[DensityEnum, tuple[int, int]] = {
     DensityEnum.HIGH: (7, 9),
 }
 
+# Probabilidad de que una nota del riff (salvo la primera) se convierta en tónica
+TONIC_RECURRENCE_PROB: dict[TonicRecurrence, float] = {
+    TonicRecurrence.LIBRE: 0.0,
+    TonicRecurrence.LOW: 0.10,
+    TonicRecurrence.MEDIUM: 0.25,
+    TonicRecurrence.HIGH: 0.45,
+}
+
 # Desplazamiento de octava del Pad según registro (en semitonos)
 PAD_REGISTER_OFFSET: dict[PadRegister, int] = {
     PadRegister.LOW: 0,     # C3 (MIDI 48)
@@ -144,6 +159,7 @@ class SongConfig:
     allowed_durations: list[float] = field(default_factory=lambda: [1.0, 0.5, 0.25])
     max_jump: int = 3
     density: DensityEnum = DensityEnum.MEDIUM
+    tonic_recurrence: TonicRecurrence = TonicRecurrence.MEDIUM
     pad_mode: PadMode = PadMode.CHORD
     pad_register: PadRegister = PadRegister.LOW
     bass_config: TrackConfig = field(default_factory=TrackConfig)

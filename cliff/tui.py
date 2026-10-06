@@ -23,6 +23,7 @@ from .models import (
     ScaleEnum,
     SongConfig,
     TonicEnum,
+    TonicRecurrence,
     TrackConfig,
 )
 
@@ -164,6 +165,10 @@ def _collect_config(console: Console) -> SongConfig:
     density = DensityEnum(questionary.select(
         "Densidad", choices=[d.value for d in DensityEnum],
     ).ask())
+    tonic_recurrence = TonicRecurrence(questionary.select(
+        "Recurrencia de tónica", choices=[r.value for r in TonicRecurrence],
+        default=TonicRecurrence.MEDIUM.value,
+    ).ask())
     # Double time solo tiene sentido en 4/4 (caja en 2 y 4). Guardado para
     # cuando el compás sea configurable.
     double_time = False
@@ -209,6 +214,7 @@ def _collect_config(console: Console) -> SongConfig:
         allowed_durations=allowed_durations,
         max_jump=max_jump,
         density=density,
+        tonic_recurrence=tonic_recurrence,
         pad_mode=pad_mode,
         pad_register=pad_register,
         bass_config=bass_config,

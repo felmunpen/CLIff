@@ -47,7 +47,7 @@
 - Tail: `build_tail_rhythm(...)` (los primeros beats del propio patrón).
 
 ### 1.4 Algoritmo Melódico (Riff)
-**Función:** `generate_melody_indices(event_count, max_jump, scale_len) -> list[int]`
+**Función:** `generate_melody_indices(event_count, max_jump, scale_len, tonic_prob=0.0) -> list[int]`
 
 **Reglas:**
 - El evento 0 es **SIEMPRE el índice 0** (tónica elegida).
@@ -58,6 +58,10 @@
   - **Bounce:**
     - Si `nuevo >= scale_len`: `ajustado = (scale_len - 1) - (nuevo - (scale_len - 1))`.
     - Si `nuevo < 0`: `ajustado = abs(nuevo)`.
+- **Recurrencia de la tónica (post-procesado):** tras generar el walk puro, se
+  recorre cada nota salvo la primera y, con probabilidad `tonic_prob`, se
+  sobreescribe a `0` (`TONIC_RECURRENCE_PROB[config.tonic_recurrence]`). No altera
+  el contorno de las notas no tocadas.
 - Retorna la lista de índices de la **frase única** (el riff).
 
 **Riff repetido (interpretación A):**
@@ -109,7 +113,8 @@
 0. Transponer la escala según la tónica: `scale_pitches = [p + TONIC_SEMITONES[tonic] for p in SCALE_PITCHES[scale]]`.
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
-3. Generar el riff y ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
+3. Generar el riff (con `tonic_prob = TONIC_RECURRENCE_PROB[config.tonic_recurrence]`) y
+   ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
 4. Repetir la estructura: `bass_notes = tile_notes(bass_structure, repetitions, total_ticks)`.
 5. Construir `pad_notes` (sobre `total_ticks * repetitions`), `guitar_notes` (transposición del
    bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con

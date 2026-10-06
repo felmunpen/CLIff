@@ -16,6 +16,7 @@ from .models import (
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
     TICKS_PER_BEAT,
+    TONIC_RECURRENCE_PROB,
     TONIC_SEMITONES,
     CymbalEnum,
     DensityEnum,
@@ -74,8 +75,15 @@ def build_tail_rhythm(pattern_rhythm_ticks: list[int], tail_ticks: int) -> list[
     return result
 
 
-def generate_melody_indices(event_count: int, max_jump: int, scale_len: int) -> list[int]:
-    """Genera una frase (riff) de `event_count` índices, empezando SIEMPRE en 0."""
+def generate_melody_indices(event_count: int, max_jump: int, scale_len: int,
+                            tonic_prob: float = 0.0) -> list[int]:
+    """Genera una frase (riff) de `event_count` índices, empezando SIEMPRE en 0.
+
+    Primero se genera el random walk puro (dirección ±1, paso 1..max_jump, rebote
+    en bordes). Después, cada nota (salvo la primera, ya tónica) se sobreescribe a
+    0 con probabilidad `tonic_prob`, superponiendo la recurrencia de la tónica sin
+    alterar el contorno de las notas no tocadas.
+    """
     indices = [0]
     for _ in range(1, event_count):
         direction = random.choice([1, -1])
@@ -86,6 +94,9 @@ def generate_melody_indices(event_count: int, max_jump: int, scale_len: int) -> 
         elif new < 0:
             new = abs(new)
         indices.append(new)
+    for i in range(1, event_count):
+        if random.random() < tonic_prob:
+            indices[i] = 0
     return indices
 
 
@@ -218,7 +229,10 @@ def generate_sequence(config: SongConfig) -> SequenceData:
     tail_rhythm_ticks = build_tail_rhythm(pattern_rhythm_ticks, tail_ticks)
 
     scale_pitches = [p + TONIC_SEMITONES[config.tonic] for p in SCALE_PITCHES[config.scale]]
-    riff = generate_melody_indices(len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches))
+    riff = generate_melody_indices(
+        len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches),
+        TONIC_RECURRENCE_PROB[config.tonic_recurrence],
+    )
 
     bass_structure = build_bass_notes(
         pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, pattern_ticks,

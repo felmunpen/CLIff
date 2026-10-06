@@ -22,6 +22,7 @@
    - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
    - `max_jump`: Slider/Int (1–5).
    - `density`: Select (`Baja`, `Media`, `Alta`).
+   - `tonic_recurrence`: Select (`Libre`, `Baja`, `Media`, `Alta`) — recurrencia de la tónica en el riff.
    - `cymbal`: Select (`Hi-hat abierto`, `Hi-hat cerrado`, `Ride`, `Crash`, `China`).
    - `double_time`: Confirm y/n (solo 4/4) — plato a corcheas y caja en 2 y 4.
 5. **Paso 4: Mezclador**
