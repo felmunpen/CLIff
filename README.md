@@ -25,7 +25,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 *   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
 
-> **Nota (caso límite de densidad):** si la duración del patrón es menor que la menor duración permitida seleccionada (p. ej. patrón de `0.25` beats con solo la Negra habilitada), la combinación es infactible para el rango de densidad y la última nota se ajustará al resto exacto, pudiendo quedar fuera del pool de duraciones elegido. No se tratará por ahora.
+> **Nota (caso límite de densidad):** el motor rellena el patrón por *backtracking* para que **todas** las notas (incluida la última) pertenezcan al pool de duraciones elegido. Solo cuando el patrón **no es combinable** con esas duraciones (p. ej. un total no múltiplo del `gcd` de las duraciones permitidas), el motor degrada a un *fallback* en el que la última nota absorbe el resto exacto, pudiendo quedar fuera del pool. La suma y la cantidad de notas se mantienen siempre exactas.
 
 ---
 

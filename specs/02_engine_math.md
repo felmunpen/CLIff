@@ -21,12 +21,22 @@
 **Reglas:**
 - Producir **exactamente `target_notes` duraciones** (en ticks), todas del pool `allowed_ticks`.
 - La **suma total es exactamente `pattern_ticks`**.
-- Al elegir cada duración (salvo la última), debe dejar un resto rellenable por las notas restantes:
-  - `min_next = min(allowed_ticks)`, `max_next = max(allowed_ticks)`
-  - `low_bound = remaining - notas_restantes * max_next`
-  - `high_bound = remaining - notas_restantes * min_next`
-  - Elegir aleatoriamente una duración de `allowed_ticks` dentro de `[low_bound, high_bound]`.
-- La **última** duración es el resto exacto: `remaining`.
+- Se resuelve por **búsqueda con retroceso aleatorizada** (en lugar de un relleno
+  greedy que dejaba la última nota como resto gigante):
+  - `allowed = sorted(set(allowed_ticks))`, `min_next = allowed[0]`, `max_next = allowed[-1]`.
+  - En cada paso, con `notes_left` notas restantes, la duración `d` debe dejar el resto
+    rellenable por las `notes_left - 1` notas restantes, dentro de la ventana:
+    - `low_bound = remaining - (notes_left - 1) * max_next`
+    - `high_bound = remaining - (notes_left - 1) * min_next`
+  - Se barajan (`random.shuffle`) las duraciones del pool dentro de `[low_bound, high_bound]`
+    y se avanza; si un camino muere, se **retrocede** y se prueba otra candidata.
+  - Con `notes_left == 0`, solo se acepta el resultado si `remaining == 0`.
+- **Garantía:** como al quedar 1 nota `low_bound == high_bound == remaining`, la última
+  nota queda **dentro del pool** (se elimina el sesgo de la nota final larga).
+- **Fallback:** si no existe solución todo-en-pool (patrón no combinable con el pool,
+  p. ej. por no ser múltiplo del `gcd` de las duraciones), se degrada a
+  `_legacy_leftover`, donde la última nota absorbe el resto exacto (puede quedar fuera
+  del pool). La suma y la longitud se mantienen exactas.
 
 **Salida:** lista de duraciones en ticks cuya suma es exactamente `pattern_ticks`.
 

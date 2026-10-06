@@ -19,9 +19,66 @@ class TestRhythmPattern(unittest.TestCase):
                 durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
                 self.assertEqual(len(durations), target)
                 self.assertEqual(sum(durations), pattern_ticks)
-                # todas menos la última deben pertenecer al pool permitido
-                for d in durations[:-1]:
+                # todas las notas (incluida la última) deben pertenecer al pool
+                for d in durations:
                     self.assertIn(d, allowed)
+
+    def test_last_note_in_pool(self):
+        random.seed(42)
+        allowed = [480, 360, 240, 120]
+        for pattern_ticks in (1920, 3360, 4560):
+            for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                self.assertIn(durations[-1], allowed)
+
+    def test_no_note_exceeds_max(self):
+        random.seed(42)
+        allowed = [480, 360, 240, 120]
+        for pattern_ticks in (1920, 3360, 4560):
+            for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                self.assertTrue(all(d <= max(allowed) for d in durations))
+
+    def test_property_feasible_configs(self):
+        allowed = [480, 360, 240, 120]
+        for seed in range(20):
+            random.seed(seed)
+            for pattern_ticks in (1920, 3360, 4560):
+                for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                    target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                    durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                    self.assertEqual(len(durations), target)
+                    self.assertEqual(sum(durations), pattern_ticks)
+                    for d in durations:
+                        self.assertIn(d, allowed)
+
+    def test_infeasible_falls_back(self):
+        # 8 notas de {480, 120} no pueden sumar 3360: el backtracking degrada al
+        # fallback, que mantiene suma y longitud exactas (la última nota puede
+        # quedar fuera del pool).
+        random.seed(1)
+        durations = engine_math.generate_rhythm_pattern(3360, [480, 120], 8)
+        self.assertEqual(len(durations), 8)
+        self.assertEqual(sum(durations), 3360)
+        for d in durations[:-1]:
+            self.assertIn(d, [480, 120])
+
+    def test_deterministic_under_seed(self):
+        random.seed(5)
+        first = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+        random.seed(5)
+        second = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+        self.assertEqual(first, second)
+
+    def test_variation_across_seeds(self):
+        results = set()
+        for seed in range(10):
+            random.seed(seed)
+            durations = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+            results.add(tuple(durations))
+        self.assertGreater(len(results), 1)
 
 
 class TestMelody(unittest.TestCase):

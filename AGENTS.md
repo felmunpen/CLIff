@@ -75,7 +75,8 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 ## 6. Próximo Trabajo (Siguiente Sesión)
 
 - ~~Hacer que la pieza dure N veces (2 por defecto)~~ — **completado**.
-- **Inminente:** profundizar en el sesgo de la nota final del patrón (`generate_rhythm_pattern`): la última nota absorbe todo el sobrante y tiende a ser la más larga — decidir entre repartir el sobrante o aprovecharlo como gesto intencionado.
+- ~~Sesgo de la nota final del patrón (`generate_rhythm_pattern`)~~ — **completado**: relleno por *backtracking* aleatorizado que mantiene todas las notas (incluida la última) dentro del pool, con fallback a "última nota = resto" solo cuando el patrón no es combinable.
+- **Inminente:** revisar `resolve_density` y `DENSITY_RANGES`. Los rangos absolutos (Baja 3-4, Media 5-6, Alta 7-9) solo distinguen niveles para patrones de ~3-5 beats; con el patrón por defecto (7 beats) Baja y Media ya claman al mínimo, y para patrones >= ~10 beats la densidad es un no-op (todo clama a `ceil(beats)`). Evaluar densidad **relativa al rango factible** `[min_notes, max_notes]` (p. ej. Baja/Media/Alta como fracciones del rango) frente a densidad como *duración media objetivo* o *notas por beat*. Ver análisis en el historial de la sesión.
 - Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
 - Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
 - Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).

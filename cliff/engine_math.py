@@ -37,27 +37,57 @@ def resolve_density(density: DensityEnum, pattern_ticks: int, allowed_ticks: lis
     return max(min_notes, min(target, max_notes))
 
 
-def generate_rhythm_pattern(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
-    """Genera exactamente `target_notes` duraciones (ticks) que suman `pattern_ticks`.
+def _legacy_leftover(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
+    """Fallback cuando no existe solución todo-en-pool (patrón no combinable).
 
-    Las duraciones intermedias se eligen del pool; la última es el resto exacto
-    (ajuste dinámico) para cuadrar la suma sin desviación.
+    Reproduce el comportamiento anterior: la última nota absorbe el resto exacto,
+    que puede quedar fuera del pool de duraciones permitidas.
     """
     durations: list[int] = []
     remaining = pattern_ticks
     min_next = min(allowed_ticks)
     for i in range(target_notes):
         if i == target_notes - 1:
-            durations.append(remaining)  # resto exacto
+            durations.append(remaining)
         else:
             notes_left = target_notes - 1 - i
-            # reservar al menos min_next para cada nota restante
             cap = remaining - notes_left * min_next
             candidates = [d for d in allowed_ticks if d <= cap]
             d = random.choice(candidates if candidates else [min_next])
             durations.append(d)
             remaining -= d
     return durations
+
+
+def generate_rhythm_pattern(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
+    """Genera exactamente `target_notes` duraciones (ticks) que suman `pattern_ticks`.
+
+    Búsqueda con retroceso aleatorizada: en cada paso se sortean las duraciones que
+    dejan el resto rellenable por las notas restantes y se retrocede si un camino
+    muere. Así todas las notas (incluida la última) pertenecen al pool. Si no existe
+    solución (patrón no combinable con el pool), se degrada a `_legacy_leftover`.
+    """
+    allowed = sorted(set(allowed_ticks))
+    min_next = allowed[0]
+    max_next = allowed[-1]
+
+    def search(remaining: int, notes_left: int, acc: list[int]):
+        if notes_left == 0:
+            return acc if remaining == 0 else None
+        low_bound = remaining - (notes_left - 1) * max_next
+        high_bound = remaining - (notes_left - 1) * min_next
+        candidates = [d for d in allowed if low_bound <= d <= high_bound]
+        random.shuffle(candidates)
+        for d in candidates:
+            found = search(remaining - d, notes_left - 1, acc + [d])
+            if found is not None:
+                return found
+        return None
+
+    solution = search(pattern_ticks, target_notes, [])
+    if solution is not None:
+        return solution
+    return _legacy_leftover(pattern_ticks, allowed, target_notes)
 
 
 def build_tail_rhythm(pattern_rhythm_ticks: list[int], tail_ticks: int) -> list[int]:
