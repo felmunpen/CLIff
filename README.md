@@ -77,8 +77,8 @@ python main.py
 
 Flujo de uso en la terminal:
 
-1.  **Ajustes Globales:** Introduce el tempo (BPM), la cantidad de compases y el número de repeticiones de la estructura completa.
-2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
+1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
+2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), el número de *loops*, la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
 3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).

@@ -64,8 +64,7 @@ def _show_header(console: Console) -> None:
     console.print()
 
 
-def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: float,
-                            repetitions: int) -> None:
+def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: float) -> None:
     """Muestra el total de beats y un mapa de bloques (ciclos + tail) de una estructura."""
     total_beats = total_bars * BEATS_PER_BAR
     full_loops, tail_ticks = engine_math.polymetry_summary(total_bars, pattern_beats)
@@ -105,9 +104,6 @@ def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: fl
     console.print(f"{total_beats} beats por estructura ({total_bars} compases × {BEATS_PER_BAR})")
     console.print(bar)
     console.print(f"[dim]{legend}[/dim]")
-    if repetitions > 1:
-        console.print(f"[dim]Estructura repetida × {repetitions} "
-                      f"= {total_beats * repetitions} beats totales[/dim]")
     console.print()
 
 
@@ -117,19 +113,19 @@ def _collect_config(console: Console) -> SongConfig:
     console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
     total_bars = int(questionary.text("Duración en compases (4-64)", default="8",
                                       validate=_int_range(4, 64)).ask())
-    repetitions = int(questionary.text(
-        "Repeticiones de la estructura completa (1-8)",
-        default="2", validate=_int_range(1, 8),
-    ).ask())
-    console.print(f"[dim]{total_bars} compases × {repetitions} repeticiones × {BEATS_PER_BAR} "
-                  f"= {total_bars * repetitions * BEATS_PER_BAR} beats totales[/dim]")
+    console.print(f"[dim]{total_bars} compases × {BEATS_PER_BAR} "
+                  f"= {total_bars * BEATS_PER_BAR} beats por estructura[/dim]")
 
     # Paso 2: Polimetría y Pad
     pattern_beats = float(questionary.text(
         "Duración del patrón en beats (ej. 3, 5, 7, 9.5)",
         default="7.0", validate=_validate_pattern_beats,
     ).ask())
-    _show_polymetry_preview(console, total_bars, pattern_beats, repetitions)
+    _show_polymetry_preview(console, total_bars, pattern_beats)
+    repetitions = int(questionary.text(
+        "Número de loops (1-8)",
+        default="2", validate=_int_range(1, 8),
+    ).ask())
     pad_breath_bars = int(questionary.text(
         "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
         default="0", validate=_int_range(0, 8),
@@ -232,8 +228,9 @@ def _show_summary(console: Console, seq) -> None:
     table = Table(title="CLIff — Resumen de Polimetría Calculada", border_style="cyan")
     table.add_column("Métrica", style="bold")
     table.add_column("Valor")
-    table.add_row("Beats Totales", f"{seq.total_beats} ({int(seq.total_beats / 4)} compases en 4/4)")
-    table.add_row("Repeticiones de la Estructura", f"{seq.repetitions}")
+    table.add_row("Beats por Estructura", f"{int(seq.total_beats / seq.repetitions)} "
+                                          f"({int(seq.total_beats / seq.repetitions / 4)} compases en 4/4)")
+    table.add_row("Loops", f"{seq.repetitions}")
     table.add_row("Duración del Patrón", f"{seq.pattern_beats} beats")
     table.add_row("Ciclos Completos (por estructura)", f"{seq.full_loops} ciclos ({seq.full_loops * seq.pattern_beats} beats)")
     table.add_row("Residuo / Tail (por estructura)", f"{seq.tail_beats} beats")

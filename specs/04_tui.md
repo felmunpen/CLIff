@@ -9,10 +9,10 @@
    - `bpm`: Entero (40–240, default 120).
    - Se muestra el compás actual (`4/4`, fijo en el MVP) antes de pedir los compases.
    - `total_bars`: Entero (4–64, default 8).
-   - `repetitions`: Entero (1–8, default 2). Nº de veces que se repite la estructura completa (ciclos completos + tail) para observar el truncamiento.
-   - Se muestra la multiplicación `total_bars × repetitions × BEATS_PER_BAR = beats totales`.
+   - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats por estructura`.
 3. **Paso 2: Polimetría y Pad**
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
+   - `repetitions` ("Número de loops"): Entero (1–8, default 2). Nº de veces que se repite la estructura completa (ciclos completos + tail) para observar el truncamiento.
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
    - `pad_mode`: Select (`Mono`, `Acorde`).
    - `pad_register`: Select (`Grave`, `Agudo`).
@@ -51,7 +51,6 @@ la TUI muestra una previsualización calculada con `engine_math.polymetry_summar
      (0.25 beat = 1 bloque) para que todos los segmentos tengan longitud entera.
    - **Escalado:** si la barra supera ~60 bloques, se reduce proporcionalmente
      (manteniendo las proporciones) para caber en el ancho de la terminal.
-   - Si `repetitions > 1`, se añade la línea "Estructura repetida × N = X beats totales".
 3. **Leyenda:** "N ciclos completos + tail de M beats".
 
 Ejemplo (8 compases en 4/4, patrón de 7 beats):
@@ -60,7 +59,6 @@ Ejemplo (8 compases en 4/4, patrón de 7 beats):
 32 beats por estructura (8 compases × 4)
 ███████ ███████ ███████ ███████ ████
 4 ciclos completos + tail de 4 beats
-Estructura repetida × 2 = 64 beats totales
 ```
 
 ### 1.3 Vista de Resultados (`rich.table`)
@@ -71,8 +69,8 @@ Tras generar, se muestra el desglose matemático y las acciones disponibles:
 ┌──────────────────────────────────────────────────────────┐
 │ CLIff — Resumen de Polimetría Calculada                  │
 ├──────────────────────────────────────────────────────────┤
-│ Beats Totales: 64.0 (16 compases en 4/4)                 │
-│ Repeticiones de la Estructura: 2                         │
+│ Beats por Estructura: 32.0 (8 compases en 4/4)           │
+│ Loops: 2                                                 │
 │ Duración del Patrón: 7.0 beats                           │
 │ Ciclos Completos (por estructura): 4 ciclos (28.0 beats) │
 │ Residuo / Tail (por estructura): 4.0 beats               │
