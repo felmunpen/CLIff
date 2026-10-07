@@ -5,6 +5,7 @@ from datetime import date
 from pathlib import Path
 
 import questionary
+from prompt_toolkit.key_binding import KeyBindings
 from rich import box
 from rich.console import Console, Group
 from rich.panel import Panel
@@ -66,6 +67,38 @@ def _validate_pattern_beats(text: str):
     if abs(value * 4 - round(value * 4)) > 1e-6:
         return "Debe ser múltiplo de 0.25 (semicorchea)."
     return True
+
+
+def _format_step_value(value: float, as_int: bool) -> str:
+    """Formatea un valor numérico para escribirlo en el buffer del prompt."""
+    if as_int:
+        return str(int(round(value)))
+    return str(round(value, 2))
+
+
+def _step_key_bindings(lo: float, hi: float, step: float, as_int: bool):
+    """Key bindings ↑/↓ para incrementar/decrementar el valor de un prompt numérico."""
+    kb = KeyBindings()
+
+    def _step(event, direction: int) -> None:
+        buffer = event.current_buffer
+        try:
+            value = float(buffer.text.strip())
+        except ValueError:
+            value = lo
+        value = max(lo, min(hi, value + direction * step))
+        buffer.text = _format_step_value(value, as_int)
+        buffer.cursor_position = len(buffer.text)
+
+    @kb.add("up")
+    def _(event):
+        _step(event, +1)
+
+    @kb.add("down")
+    def _(event):
+        _step(event, -1)
+
+    return kb
 
 
 def _show_header(console: Console) -> None:
@@ -136,10 +169,12 @@ def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: fl
 def _collect_config(console: Console) -> SongConfig:
     # Paso 1: Configuración global
     _section(console, "Configuración Global")
-    bpm = int(questionary.text("BPM (40-240)", default="120", validate=_int_range(40, 240)).ask())
+    bpm = int(questionary.text("BPM (40-240)", default="120", validate=_int_range(40, 240),
+                               key_bindings=_step_key_bindings(40, 240, 1, True)).ask())
     console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
     total_bars = int(questionary.text("Duración en compases (4-64)", default="4",
-                                      validate=_int_range(4, 64)).ask())
+                                      validate=_int_range(4, 64),
+                                      key_bindings=_step_key_bindings(4, 64, 1, True)).ask())
     console.print(f"[dim]{total_bars} compases × {BEATS_PER_BAR} "
                   f"= {total_bars * BEATS_PER_BAR} beats por estructura[/dim]")
 
@@ -148,15 +183,18 @@ def _collect_config(console: Console) -> SongConfig:
     pattern_beats = float(questionary.text(
         "Duración del patrón en beats (ej. 3, 5, 7, 9.5)",
         default="7.0", validate=_validate_pattern_beats,
+        key_bindings=_step_key_bindings(0.25, 32.0, 0.25, False),
     ).ask())
     _show_polymetry_preview(console, total_bars, pattern_beats)
     repetitions = int(questionary.text(
         "Número de loops (1-8)",
         default="2", validate=_int_range(1, 8),
+        key_bindings=_step_key_bindings(1, 8, 1, True),
     ).ask())
     pad_breath_bars = int(questionary.text(
         "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
         default="0", validate=_int_range(0, 8),
+        key_bindings=_step_key_bindings(0, 8, 1, True),
     ).ask())
     pad_mode = PadMode(questionary.select(
         "Modo del Pad", choices=[m.value for m in PadMode],
@@ -186,7 +224,8 @@ def _collect_config(console: Console) -> SongConfig:
             "Duraciones permitidas", choices=duration_choices,
         ).ask()
     max_jump = int(questionary.text("Salto melódico máximo (1-5)", default="3",
-                                    validate=_int_range(1, 5)).ask())
+                                    validate=_int_range(1, 5),
+                                    key_bindings=_step_key_bindings(1, 5, 1, True)).ask())
     density = DensityEnum(questionary.select(
         "Densidad", choices=[d.value for d in DensityEnum],
     ).ask())
@@ -213,9 +252,11 @@ def _collect_config(console: Console) -> SongConfig:
                            ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
                            ("Percusión", "drums_config")):
             velocity = int(questionary.text(f"{label} — velocity (0-127)", default="100",
-                                            validate=_int_range(0, 127)).ask())
+                                            validate=_int_range(0, 127),
+                                            key_bindings=_step_key_bindings(0, 127, 1, True)).ask())
             volume = int(questionary.text(f"{label} — volumen (0-100)", default="100",
-                                          validate=_int_range(0, 100)).ask())
+                                          validate=_int_range(0, 100),
+                                          key_bindings=_step_key_bindings(0, 100, 1, True)).ask())
             track_configs[key] = TrackConfig(velocity=velocity, volume=volume)
         bass_config = track_configs["bass_config"]
         pad_config = track_configs["pad_config"]
@@ -228,7 +269,8 @@ def _collect_config(console: Console) -> SongConfig:
     # Paso 5: Lote
     _section(console, "Lote")
     variations = int(questionary.text("Variaciones a generar (1-5)", default="1",
-                                      validate=_int_range(1, 5)).ask())
+                                      validate=_int_range(1, 5),
+                                      key_bindings=_step_key_bindings(1, 5, 1, True)).ask())
 
     config = SongConfig(
         bpm=bpm,
