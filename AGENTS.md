@@ -80,6 +80,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
 - Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
 - Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).
+- Posible feature futura: **secuenciador de ritmo** en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*). Aplazado por salirse del alcance actual de la aplicación.
 
 ---
 

@@ -4,7 +4,9 @@
 
 ### 1.1 Pantallas y Pasos Interactivos (`questionary`)
 
-1. **Header:** Banner ASCII de **CLIff** generado con `rich.panel`.
+1. **Header:** Logo **CLIff** en un `Panel` (subtítulo, motivo y tagline) con un `Theme`
+   propio (`cliff.brand/accent/muted/warn/ok`). Cada paso se separa con un `Rule`
+   titulado: "Configuración Global", "Estructura", "Reglas Algorítmicas", "Mezclador", "Lote".
 2. **Paso 1: Configuración Global**
    - `bpm`: Entero (40–240, default 120).
    - Se muestra el compás actual (`4/4`, fijo en el MVP) antes de pedir los compases.
@@ -34,7 +36,8 @@
 6. **Paso 5: Lote**
    - `variations`: Entero (1–5, default 1). Nº de variaciones (MIDIs) a generar con los mismos parámetros.
 7. **Generar**
-   - Se ejecuta `engine_math` + `engine_midi` una vez por variación (MIDI en memoria).
+   - Se ejecuta `engine_math` + `engine_midi` una vez por variación (MIDI en memoria),
+     con una barra de progreso (`rich.progress`) durante la generación del lote.
 
 ### 1.2 Previsualización de Polimetría (`rich`)
 
@@ -63,22 +66,40 @@ Ejemplo (8 compases en 4/4, patrón de 7 beats):
 
 ### 1.3 Vista de Resultados (`rich.table`)
 
-Tras generar, se muestra el desglose matemático y las acciones disponibles:
+Tras generar, se muestra:
+
+1. **Resumen** (`box.ROUNDED`, con título y caption): métricas de polimetría (beats por
+   estructura, loops, duración del patrón, ciclos, tail) más los parámetros de la pieza
+   (BPM, tónica, escala, densidad, recurrencia de tónica, salto melódico, duraciones
+   permitidas, plato y double time).
+2. **Mezclador** (`box.SIMPLE`): por pista (Pad, Bajo, Guitarra, Arpegiador, Percusión)
+   el instrumento GM, velocity y volumen.
+3. **Panel de acciones** con la leyenda:
+   - 💾 Exportar — guardar el/los .mid
+   - ↩ Volver — modificar parámetros
+   - ✕ Salir — terminar
+
+Ejemplo del resumen (8 compases, patrón de 7 beats):
 
 ```text
-┌──────────────────────────────────────────────────────────┐
-│ CLIff — Resumen de Polimetría Calculada                  │
-├──────────────────────────────────────────────────────────┤
-│ Beats por Estructura: 32.0 (8 compases en 4/4)           │
-│ Loops: 2                                                 │
-│ Duración del Patrón: 7.0 beats                           │
-│ Ciclos Completos (por estructura): 4 ciclos (28.0 beats) │
-│ Residuo / Tail (por estructura): 4.0 beats               │
-└──────────────────────────────────────────────────────────┘
-
-Acciones:
-  💾 Exportar  (guarda el .mid en /output o carpeta elegida)
-  ↩ Volver     (modificar parámetros)
+┌───────────────────────────────────┬─────────────────────────────┐
+│ Métrica                           │ Valor                       │
+├───────────────────────────────────┼─────────────────────────────┤
+│ Beats por Estructura              │ 32 (8 compases en 4/4)      │
+│ Loops                             │ 2                           │
+│ Duración del Patrón               │ 7.0 beats                   │
+│ Ciclos Completos (por estructura) │ 4 ciclos (28.0 beats)       │
+│ Residuo / Tail (por estructura)   │ 4.0 beats                   │
+│ BPM                               │ 120                         │
+│ Tónica                            │ C                           │
+│ Escala                            │ Menor (Eólica)              │
+│ Densidad                          │ Media                       │
+│ Recurrencia de tónica             │ Media                       │
+│ Salto melódico máximo             │ 3                           │
+│ Duraciones permitidas             │ Negra, Corchea, Semicorchea │
+│ Plato                             │ Hi-hat abierto              │
+│ Double time                       │ No                          │
+└───────────────────────────────────┴─────────────────────────────┘
 ```
 
 - **💾 Exportar**: guarda los `.mid` con el nombre `{tónica}_{escala}_{compás}_{bpm}bpm_{fechaDDMMYYYY}_{nº}.mid` (p. ej. `c_eolian_44_146bpm_05102026_3.mid`). El `nº` es el siguiente libre en la carpeta de destino (evita sobreescritura); en lote se asignan números consecutivos.

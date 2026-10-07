@@ -106,3 +106,4 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 6. Implementación del Arpegiador (hoy pista fantasma en el MVP).
 7. Tail generado como nuevo motivo (en lugar de truncado del patrón).
 8. Selección de instrumento por pista.
+9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
