@@ -38,6 +38,11 @@
 7. **Generar**
    - Se ejecuta `engine_math` + `engine_midi` una vez por variación (MIDI en memoria),
      con una barra de progreso (`rich.progress`) durante la generación del lote.
+8. **Navegación:**
+   - Los campos numéricos aceptan ↑/↓ para incrementar/decrementar su valor
+     (enteros ±1; `pattern_beats` ±0.25), acotado al rango válido.
+   - **Ctrl+C** retrocede a la pregunta anterior; en el primer prompt sale del programa.
+   - El header muestra esta ayuda como texto `dim`.
 
 ### 1.2 Previsualización de Polimetría (`rich`)
 
@@ -74,10 +79,8 @@ Tras generar, se muestra:
    permitidas, plato y double time).
 2. **Mezclador** (`box.SIMPLE`): por pista (Pad, Bajo, Guitarra, Arpegiador, Percusión)
    el instrumento GM, velocity y volumen.
-3. **Panel de acciones** con la leyenda:
-   - 💾 Exportar — guardar el/los .mid
-   - ↩ Volver — modificar parámetros
-   - ✕ Salir — terminar
+3. **Selector de acciones** (sin leyenda): un `questionary.select` con las opciones
+   💾 Exportar, ↩ Volver y ✕ Salir.
 
 Ejemplo del resumen (8 compases, patrón de 7 beats):
 
