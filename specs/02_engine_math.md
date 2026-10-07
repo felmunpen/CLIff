@@ -46,6 +46,14 @@
 
 **Salida:** lista de duraciones en ticks cuya suma es exactamente `pattern_ticks`.
 
+**Función:** `pattern_is_combinable(pattern_beats, allowed_durations) -> bool`
+- Calcula el `gcd` de las duraciones permitidas (en ticks) y devuelve si divide al
+  total de ticks del patrón.
+- `False` significa que `generate_rhythm_pattern` degradará al fallback (última nota
+  fuera del pool). P. ej. patrón `XX.25`/`XX.75` (total impar en unidades de semicorchea)
+  con solo negras (4) y corcheas (2) en el pool.
+- La TUI usa esta función para bloquear combinaciones no factibles.
+
 ### 1.3 Bucle de Polimetría y Cálculo del Tail
 
 **Función pura:** `polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]`

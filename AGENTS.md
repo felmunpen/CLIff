@@ -81,7 +81,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - ~~Incrementar/decrementar campos numéricos con flechas~~ — **completado**: enteros ±1; `pattern_beats` ±0.25.
 - ~~Navegación atrás entre preguntas~~ — **completado**: Ctrl+C retrocede una pregunta; en el primer prompt sale del programa.
 - ~~Densidad relativa al rango factible (`resolve_density` / `DENSITY_FRACTIONS`)~~ — **completado**: la densidad se interpreta como fracción del rango `[min_notes, max_notes]` (Baja 0.25, Media 0.5, Alta 0.8), eliminando el colapso a "todo negras" cuando la negra está en el pool.
-- Guarda de combinabilidad (aplazado a la rama fix): si `pattern_beats × 4` es impar (longitud XX.25/XX.75) y **no** se seleccionan corchea con puntillo (0.75) ni semicorchea (0.25), el patrón no es combinable y degrada al *fallback*. Añadir aviso/bloqueo en la TUI tras conocer `pattern_beats` y `allowed_durations`.
+- ~~Guarda de combinabilidad~~ — **completado**: `pattern_is_combinable` (gcd) avisa/bloquea en la TUI cuando `pattern_beats × 4` es impar (XX.25/XX.75) sin corchea con puntillo ni semicorchea en el pool.
 - Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
 - Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
 - Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).

@@ -108,6 +108,18 @@ class TestDensityResolution(unittest.TestCase):
         self.assertEqual(engine_math.resolve_density(DensityEnum.MEDIUM, 3360, [480]), 7)
 
 
+class TestCombinability(unittest.TestCase):
+    def test_quarter_pattern_needs_odd_duration(self):
+        self.assertTrue(engine_math.pattern_is_combinable(7.0, [1.0, 0.5, 0.25]))
+        self.assertTrue(engine_math.pattern_is_combinable(7.5, [1.0, 0.5]))
+        self.assertFalse(engine_math.pattern_is_combinable(7.25, [1.0, 0.5]))
+        self.assertFalse(engine_math.pattern_is_combinable(7.75, [1.0, 0.5]))
+
+    def test_odd_duration_restores_combinability(self):
+        self.assertTrue(engine_math.pattern_is_combinable(7.25, [1.0, 0.5, 0.25]))
+        self.assertTrue(engine_math.pattern_is_combinable(7.25, [1.0, 0.75]))
+
+
 class TestMelody(unittest.TestCase):
     def test_starts_at_tonic_and_in_bounds(self):
         random.seed(1)

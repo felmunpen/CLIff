@@ -262,10 +262,18 @@ def _collect_config(console: Console):
             selected = _ask(questionary.checkbox(
                 "Duraciones permitidas", choices=duration_choices,
             ))
-            if selected:
-                a["allowed_durations"] = selected
-                return
-            console.print("[yellow]Selecciona al menos una duración.[/yellow]")
+            if not selected:
+                console.print("[yellow]Selecciona al menos una duración.[/yellow]")
+                continue
+            if not engine_math.pattern_is_combinable(a["pattern_beats"], selected):
+                console.print(
+                    "[yellow]Esa combinación no puede rellenar exactamente el patrón de "
+                    f"{a['pattern_beats']} beats. Añade corchea con puntillo (0.75) o "
+                    "semicorchea (0.25), o pulsa Ctrl+C para cambiar la duración del patrón.[/yellow]"
+                )
+                continue
+            a["allowed_durations"] = selected
+            return
 
     def s_max_jump():
         a["max_jump"] = int(_ask(questionary.text("Salto melódico máximo (1-5)", default="3",

@@ -21,7 +21,7 @@
 4. **Paso 3: Reglas Algorítmicas**
    - `tonic`: Select (nota central, 12 notas solo sostenidos: `C`, `C#`, `D`, ..., `B`).
    - `scale`: Select (`Mayor`, `Menor (Eólica)`, `Menor Armónica`, `Frigio`, `Frigio Dominante`).
-   - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
+   - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`). Si la combinación elegida no puede rellenar exactamente el patrón (`pattern_is_combinable` devuelve `False`), se muestra un aviso y se vuelve a pedir (o el usuario puede retroceder con Ctrl+C para cambiar la duración del patrón).
    - `max_jump`: Slider/Int (1–5).
    - `density`: Select (`Baja`, `Media`, `Alta`).
    - `tonic_recurrence`: Select (`Libre`, `Baja`, `Media`, `Alta`) — recurrencia de la tónica en el riff.

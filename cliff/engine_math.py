@@ -44,6 +44,21 @@ def resolve_density(density: DensityEnum, pattern_ticks: int, allowed_ticks: lis
     return max(min_notes, min(target, max_notes))
 
 
+def pattern_is_combinable(pattern_beats: float, allowed_durations: list[float]) -> bool:
+    """Indica si el patrón se puede rellenar exactamente con las duraciones dadas.
+
+    Devuelve False cuando el `gcd` de las duraciones (en ticks) no divide al total
+    de ticks del patrón; en ese caso `generate_rhythm_pattern` degrada al fallback
+    y la última nota queda fuera del pool (p. ej. patrón XX.25/XX.75 sin corchea
+    con puntillo ni semicorchea).
+    """
+    allowed_ticks = [beats_to_ticks(d) for d in allowed_durations]
+    g = 0
+    for t in allowed_ticks:
+        g = math.gcd(g, t)
+    return beats_to_ticks(pattern_beats) % g == 0
+
+
 def _legacy_leftover(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
     """Fallback cuando no existe solución todo-en-pool (patrón no combinable).
 
