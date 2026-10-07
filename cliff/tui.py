@@ -351,16 +351,6 @@ def _result_screen(console: Console, config: SongConfig, seq, midis) -> str:
     _show_summary(console, config, seq)
     if len(midis) > 1:
         console.print(f"[dim]Se generaron {len(midis)} variaciones.[/dim]")
-    console.print(Panel(
-        Group(
-            Text("💾 Exportar  — guardar el/los .mid", justify="center"),
-            Text("↩ Volver   — modificar parámetros", justify="center"),
-            Text("✕ Salir    — terminar", justify="center"),
-        ),
-        border_style="cyan",
-        padding=(0, 2),
-        width=46,
-    ))
     while True:
         action = questionary.select(
             "Acción",
