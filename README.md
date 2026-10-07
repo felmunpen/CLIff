@@ -107,3 +107,5 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 7. Tail generado como nuevo motivo (en lugar de truncado del patrón).
 8. Selección de instrumento por pista.
 9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
+10. Fill rítmico al final de cada loop (transición entre repeticiones).
+11. Intros configurables (cuatro golpes de hi-hat, drone suave o el propio tail).
