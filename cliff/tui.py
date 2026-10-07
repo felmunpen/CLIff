@@ -306,6 +306,14 @@ def _collect_config(console: Console):
             "Plato", choices=[c.value for c in CymbalEnum],
         )))
 
+    def s_cymbal_vary():
+        vary = False
+        if a["repetitions"] > 1:
+            vary = _ask(questionary.confirm(
+                "¿Variar el plato en cada loop? (aleatorio)", default=False,
+            ))
+        a["cymbal_vary"] = vary
+
     mixer_keys = (("Pad", "pad_config"), ("Bajo", "bass_config"),
                   ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
                   ("Percusión", "drums_config"))
@@ -356,7 +364,8 @@ def _collect_config(console: Console):
 
     steps = [s_bpm, s_total_bars, s_pattern_beats, s_repetitions, s_pad_breath,
              s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
-             s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_mixer, s_variations]
+             s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_cymbal_vary,
+             s_mixer, s_variations]
 
     if _run_steps(steps):
         return None
@@ -391,6 +400,7 @@ def _collect_config(console: Console):
         drums_config=drums_config,
         double_time=a["double_time"],
         cymbal=a["cymbal"],
+        cymbal_vary=a["cymbal_vary"],
     )
     return config, a["variations"]
 
@@ -418,7 +428,10 @@ def _show_summary(console: Console, config: SongConfig, seq) -> None:
     main.add_row("Recurrencia de tónica", f"{config.tonic_recurrence.value}")
     main.add_row("Salto melódico máximo", f"{config.max_jump}")
     main.add_row("Duraciones permitidas", durations)
-    main.add_row("Plato", f"{config.cymbal.value}")
+    cymbal_label = (
+        f"{config.cymbal.value} (varía por loop)" if config.cymbal_vary else config.cymbal.value
+    )
+    main.add_row("Plato", cymbal_label)
     main.add_row("Double time", "Sí" if config.double_time else "No")
 
     mixer = Table(box=box.SIMPLE, title="Mezclador", border_style="dim")

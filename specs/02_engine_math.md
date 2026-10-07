@@ -114,6 +114,7 @@
 - **Kick (36):** clona los tiempos absolutos de `Note On` del Bass.
 - **Snare (38):** beat 3 de cada compás por defecto (`bar_start + 960` ticks); en *double time*, beats 2 y 4 (`bar_start + 480` y `bar_start + 1440`).
 - **Plato:** negras por defecto (cada 480 ticks); en *double time*, corcheas (cada 240 ticks). Nota según `CYMBAL_PITCHES[cymbal]`.
+  - Si `cymbal_vary` y `repetitions > 1`, el plato se emite **por loop**: el primer loop usa el plato elegido y cada loop siguiente elige un plato **aleatorio distinto del anterior** (`cymbal_pitches_per_loop`).
 - Duración fija de los golpes (p.ej. 120 ticks).
 - `velocity` = `drums_config.velocity`.
 

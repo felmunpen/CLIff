@@ -4,7 +4,16 @@ import random
 import unittest
 
 from cliff import engine_math
-from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, TonicRecurrence, beats_to_ticks
+from cliff.models import (
+    CYMBAL_PITCHES,
+    CymbalEnum,
+    DensityEnum,
+    ScaleEnum,
+    SongConfig,
+    TonicEnum,
+    TonicRecurrence,
+    beats_to_ticks,
+)
 
 TICKS = 480
 
@@ -317,6 +326,62 @@ class TestTonicRecurrence(unittest.TestCase):
         libre_tonics = sum(1 for n in libre.bass_notes if n.pitch == tonic_pitch)
         high_tonics = sum(1 for n in high.bass_notes if n.pitch == tonic_pitch)
         self.assertGreaterEqual(high_tonics, libre_tonics)
+
+
+class TestCymbalVariation(unittest.TestCase):
+    def _loop_pitches(self, seq, structure_ticks):
+        cymbal_pitches = set(CYMBAL_PITCHES.values())
+        loops = {}
+        for n in seq.percussion_notes:
+            if n.pitch in cymbal_pitches:
+                loop = n.start_tick // structure_ticks
+                loops.setdefault(loop, set()).add(n.pitch)
+        return loops
+
+    def test_single_repetition_is_single_cymbal(self):
+        random.seed(1)
+        config = SongConfig(total_bars=4, repetitions=1, cymbal_vary=True)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        loops = self._loop_pitches(seq, structure_ticks)
+        self.assertEqual(len(loops), 1)
+        self.assertEqual(loops[0], {CYMBAL_PITCHES[config.cymbal]})
+
+    def test_variation_first_loop_is_chosen(self):
+        random.seed(1)
+        config = SongConfig(total_bars=4, repetitions=3, cymbal_vary=True)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        loops = self._loop_pitches(seq, structure_ticks)
+        self.assertEqual(len(loops), 3)
+        self.assertEqual(loops[0], {CYMBAL_PITCHES[config.cymbal]})
+
+    def test_variation_no_consecutive_repeat(self):
+        random.seed(1)
+        config = SongConfig(total_bars=4, repetitions=3, cymbal_vary=True)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        loops = self._loop_pitches(seq, structure_ticks)
+        pitches = [next(iter(loops[i])) for i in sorted(loops)]
+        for a, b in zip(pitches, pitches[1:]):
+            self.assertNotEqual(a, b)
+
+    def test_default_no_variation(self):
+        random.seed(1)
+        config = SongConfig(total_bars=4, repetitions=3)  # cymbal_vary=False por defecto
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        loops = self._loop_pitches(seq, structure_ticks)
+        pitches = {next(iter(s)) for s in loops.values()}
+        self.assertEqual(pitches, {CYMBAL_PITCHES[config.cymbal]})
+
+    def test_cymbal_pitches_per_loop(self):
+        random.seed(1)
+        pitches = engine_math.cymbal_pitches_per_loop(CymbalEnum.OPEN_HI_HAT, 5)
+        self.assertEqual(pitches[0], CYMBAL_PITCHES[CymbalEnum.OPEN_HI_HAT])
+        self.assertEqual(len(pitches), 5)
+        for a, b in zip(pitches, pitches[1:]):
+            self.assertNotEqual(a, b)
 
 
 if __name__ == "__main__":

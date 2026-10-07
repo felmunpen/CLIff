@@ -196,14 +196,32 @@ def build_pad_notes(scale_pitches, pad_mode, pad_register, total_ticks, pad_brea
     return notes
 
 
+def cymbal_pitches_per_loop(base_cymbal: CymbalEnum, repetitions: int) -> list[int]:
+    """Plato (pitch MIDI) por loop: el primero es el elegido; cada uno de los
+    siguientes es un plato aleatorio distinto del anterior (nunca dos loops
+    seguidos con el mismo pulso)."""
+    if repetitions <= 1:
+        return [CYMBAL_PITCHES[base_cymbal]]
+    pitches = [CYMBAL_PITCHES[base_cymbal]]
+    for _ in range(1, repetitions):
+        candidates = [p for p in CYMBAL_PITCHES.values() if p != pitches[-1]]
+        pitches.append(random.choice(candidates))
+    return pitches
+
+
 def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False,
-                           cymbal_pitch=CYMBAL_PITCHES[CymbalEnum.OPEN_HI_HAT]) -> list[NoteEvent]:
+                           cymbal_pitch=CYMBAL_PITCHES[CymbalEnum.OPEN_HI_HAT],
+                           cymbal_pitches=None, structure_bars=None) -> list[NoteEvent]:
     """Construye la percusión: kick (clona el bajo), snare y plato.
 
     Por defecto: caja en el beat 3 y plato en negras. En double time: caja en
     beats 2 y 4 y plato en corcheas. La colocación de la caja asume compás 4/4;
     si en el futuro se soportan otras métricas, habrá que generalizar esta
     lógica por compás.
+
+    El plato se emite por loop si `cymbal_pitches` trae un pitch por loop (y
+    `structure_bars` los compases de cada loop); en caso contrario, un único
+    `cymbal_pitch` cubre toda la pieza.
     """
     notes: list[NoteEvent] = []
     hit_ticks = 120  # duración fija de los golpes
@@ -224,8 +242,13 @@ def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False,
 
     # Plato: default -> negras; double time -> corcheas
     step = TICKS_PER_BEAT // 2 if double_time else TICKS_PER_BEAT
-    for tick in range(0, total_bars * bar_ticks, step):
-        notes.append(NoteEvent(pitch=cymbal_pitch, start_tick=tick, duration_ticks=hit_ticks, velocity=velocity))
+    pitches = cymbal_pitches if cymbal_pitches else [cymbal_pitch]
+    loop_bars = structure_bars if structure_bars else total_bars
+    for loop, pitch in enumerate(pitches):
+        start = loop * loop_bars * bar_ticks
+        end = min((loop + 1) * loop_bars * bar_ticks, total_bars * bar_ticks)
+        for tick in range(start, end, step):
+            notes.append(NoteEvent(pitch=pitch, start_tick=tick, duration_ticks=hit_ticks, velocity=velocity))
 
     notes.sort(key=lambda n: n.start_tick)
     return notes
@@ -296,9 +319,16 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         config.pad_breath_bars, config.pad_config.velocity,
     )
     guitar_notes = build_guitar_notes(bass_notes, config.guitar_config.velocity)
+    cymbal_pitches = (
+        cymbal_pitches_per_loop(config.cymbal, config.repetitions)
+        if config.cymbal_vary and config.repetitions > 1
+        else None
+    )
     percussion_notes = build_percussion_notes(
         bass_notes, config.total_bars * config.repetitions, config.drums_config.velocity,
         config.double_time, CYMBAL_PITCHES[config.cymbal],
+        cymbal_pitches=cymbal_pitches,
+        structure_bars=config.total_bars if cymbal_pitches else None,
     )
 
     return SequenceData(

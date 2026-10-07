@@ -170,6 +170,7 @@ class SongConfig:
     drums_config: TrackConfig = field(default_factory=TrackConfig)
     double_time: bool = False           # platos a corcheas y caja en 2/4 (solo 4/4)
     cymbal: CymbalEnum = CymbalEnum.OPEN_HI_HAT
+    cymbal_vary: bool = False           # variar el plato (aleatorio) en cada loop si repetitions > 1
 
 @dataclass
 class NoteEvent:

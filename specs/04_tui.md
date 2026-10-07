@@ -26,6 +26,7 @@
    - `density`: Select (`Baja`, `Media`, `Alta`).
    - `tonic_recurrence`: Select (`Libre`, `Baja`, `Media`, `Alta`) — recurrencia de la tónica en el riff.
    - `cymbal`: Select (`Hi-hat abierto`, `Hi-hat cerrado`, `Ride`, `Crash`, `China`).
+   - `cymbal_vary`: Confirm y/n "¿Variar el plato en cada loop? (aleatorio)" (default No), solo si `repetitions > 1`.
    - `double_time`: Confirm y/n (solo 4/4) — plato a corcheas y caja en 2 y 4.
 5. **Paso 4: Mezclador**
    - Confirm `y/n`: "¿Personalizar volumen y velocity de las pistas?" (default No).
@@ -104,6 +105,8 @@ Ejemplo del resumen (8 compases, patrón de 7 beats):
 │ Double time                       │ No                          │
 └───────────────────────────────────┴─────────────────────────────┘
 ```
+
+> Si `cymbal_vary` está activo, la fila **Plato** muestra `Hi-hat abierto (varía por loop)`.
 
 - **💾 Exportar**: guarda los `.mid` con el nombre `{tónica}_{escala}_{compás}_{bpm}bpm_{fechaDDMMYYYY}_{nº}.mid` (p. ej. `c_eolian_44_146bpm_05102026_3.mid`). El `nº` es el siguiente libre en la carpeta de destino (evita sobreescritura); en lote se asignan números consecutivos.
 - Los tiempos y duraciones se muestran al usuario con **nombres de nota** (negra, corchea…), nunca en ticks enteros.

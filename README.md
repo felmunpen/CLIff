@@ -18,7 +18,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
     *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
     *   **Guitarra:** Duplica la línea del bajo una octava por encima con overdrive (GM 29).
     *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
-    *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y plato en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Plato configurable (hi-hat abierto/cerrado, ride, crash o china) y opción *double time* (caja en 2 y 4 y plato en corcheas).
+    *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y plato en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Plato configurable (hi-hat abierto/cerrado, ride, crash o china), opción *double time* (caja en 2 y 4 y plato en corcheas) y variación aleatoria del plato por loop.
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Recurrencia de tónica:** Regula con qué probabilidad las notas del riff vuelven a la tónica (Libre/Baja/Media/Alta), superponiendo acentos de tónica sin alterar el contorno melódico.
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
@@ -79,7 +79,7 @@ Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
 2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), el número de *loops*, la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
-3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
+3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china), si quieres que el plato varíe en cada loop y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).
 6.  **Generación:** Genera las piezas y, desde el resumen, usa **💾 Exportar** para guardar los archivos `.mid` en `/output` (o en la carpeta que elijas).
