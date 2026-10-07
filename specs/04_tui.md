@@ -10,7 +10,7 @@
 2. **Paso 1: Configuración Global**
    - `bpm`: Entero (40–240, default 120).
    - Se muestra el compás actual (`4/4`, fijo en el MVP) antes de pedir los compases.
-   - `total_bars`: Entero (4–64, default 8).
+   - `total_bars`: Entero (4–64, default 4).
    - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats por estructura`.
 3. **Paso 2: Polimetría y Pad**
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).

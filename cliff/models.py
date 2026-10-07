@@ -174,7 +174,7 @@ class TrackConfig:
 @dataclass
 class SongConfig:
     bpm: int = 120
-    total_bars: int = 8
+    total_bars: int = 4
     repetitions: int = 2                # nº de veces que se repite la estructura (ciclos + tail)
     pattern_beats: float = 7.0
     pad_breath_bars: int = 0            # 0 = Drone Infinito; 1-8 = re-disparo

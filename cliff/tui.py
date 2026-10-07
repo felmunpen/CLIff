@@ -138,7 +138,7 @@ def _collect_config(console: Console) -> SongConfig:
     _section(console, "Configuración Global")
     bpm = int(questionary.text("BPM (40-240)", default="120", validate=_int_range(40, 240)).ask())
     console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
-    total_bars = int(questionary.text("Duración en compases (4-64)", default="8",
+    total_bars = int(questionary.text("Duración en compases (4-64)", default="4",
                                       validate=_int_range(4, 64)).ask())
     console.print(f"[dim]{total_bars} compases × {BEATS_PER_BAR} "
                   f"= {total_bars * BEATS_PER_BAR} beats por estructura[/dim]")
