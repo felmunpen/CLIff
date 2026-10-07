@@ -101,6 +101,31 @@ def _step_key_bindings(lo: float, hi: float, step: float, as_int: bool):
     return kb
 
 
+class _Back(Exception):
+    """Señal interna: el usuario pidió retroceder a la pregunta anterior."""
+
+
+def _ask(question):
+    """Pregunta con `questionary`; Ctrl+C (KeyboardInterrupt) retrocede una pregunta."""
+    try:
+        return question.unsafe_ask()
+    except KeyboardInterrupt:
+        raise _Back from None
+
+
+def _run_steps(steps):
+    """Ejecuta pasos con navegación atrás. Devuelve True si se retrocedió del primero."""
+    i = 0
+    while 0 <= i < len(steps):
+        try:
+            steps[i]()
+        except _Back:
+            i -= 1
+            continue
+        i += 1
+    return i < 0
+
+
 def _show_header(console: Console) -> None:
     console.print()
     console.print(Panel(
@@ -109,6 +134,7 @@ def _show_header(console: Console) -> None:
             Text("Polymetric MIDI Generator", style="italic", justify="center"),
             Text("≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈", style="magenta", justify="center"),
             Text("algorithmic riffs · in your terminal", style="dim", justify="center"),
+            Text("Ctrl+C = retroceder · al inicio = salir", style="dim", justify="center"),
         ),
         border_style="cyan",
         padding=(1, 2),
@@ -166,135 +192,199 @@ def _show_polymetry_preview(console: Console, total_bars: int, pattern_beats: fl
     console.print()
 
 
-def _collect_config(console: Console) -> SongConfig:
-    # Paso 1: Configuración global
-    _section(console, "Configuración Global")
-    bpm = int(questionary.text("BPM (40-240)", default="120", validate=_int_range(40, 240),
-                               key_bindings=_step_key_bindings(40, 240, 1, True)).ask())
-    console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
-    total_bars = int(questionary.text("Duración en compases (4-64)", default="4",
-                                      validate=_int_range(4, 64),
-                                      key_bindings=_step_key_bindings(4, 64, 1, True)).ask())
-    console.print(f"[dim]{total_bars} compases × {BEATS_PER_BAR} "
-                  f"= {total_bars * BEATS_PER_BAR} beats por estructura[/dim]")
-
-    # Paso 2: Polimetría y Pad
-    _section(console, "Estructura")
-    pattern_beats = float(questionary.text(
-        "Duración del patrón en beats (ej. 3, 5, 7, 9.5)",
-        default="7.0", validate=_validate_pattern_beats,
-        key_bindings=_step_key_bindings(0.25, 32.0, 0.25, False),
-    ).ask())
-    _show_polymetry_preview(console, total_bars, pattern_beats)
-    repetitions = int(questionary.text(
-        "Número de loops (1-8)",
-        default="2", validate=_int_range(1, 8),
-        key_bindings=_step_key_bindings(1, 8, 1, True),
-    ).ask())
-    pad_breath_bars = int(questionary.text(
-        "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
-        default="0", validate=_int_range(0, 8),
-        key_bindings=_step_key_bindings(0, 8, 1, True),
-    ).ask())
-    pad_mode = PadMode(questionary.select(
-        "Modo del Pad", choices=[m.value for m in PadMode],
-    ).ask())
-    pad_register = PadRegister(questionary.select(
-        "Registro del Pad", choices=[r.value for r in PadRegister],
-    ).ask())
-
-    # Paso 3: Reglas algorítmicas
-    _section(console, "Reglas Algorítmicas")
-    tonic = TonicEnum(questionary.select(
-        "Nota central (tónica)", choices=[t.value for t in TonicEnum],
-    ).ask())
-    scale = ScaleEnum(questionary.select(
-        "Escala", choices=[s.value for s in ScaleEnum],
-    ).ask())
+def _collect_config(console: Console):
+    """Recoge la configuración pregunta a pregunta, con navegación atrás (Ctrl+C)."""
+    a: dict = {}
     duration_choices = [
         questionary.Choice(f"{name} [{value}]", value=value)
         for name, value in DURATION_OPTIONS
     ]
-    allowed_durations = questionary.checkbox(
-        "Duraciones permitidas", choices=duration_choices,
-    ).ask()
-    while not allowed_durations:
-        console.print("[yellow]Selecciona al menos una duración.[/yellow]")
-        allowed_durations = questionary.checkbox(
-            "Duraciones permitidas", choices=duration_choices,
-        ).ask()
-    max_jump = int(questionary.text("Salto melódico máximo (1-5)", default="3",
-                                    validate=_int_range(1, 5),
-                                    key_bindings=_step_key_bindings(1, 5, 1, True)).ask())
-    density = DensityEnum(questionary.select(
-        "Densidad", choices=[d.value for d in DensityEnum],
-    ).ask())
-    tonic_recurrence = TonicRecurrence(questionary.select(
-        "Recurrencia de tónica", choices=[r.value for r in TonicRecurrence],
-        default=TonicRecurrence.MEDIUM.value,
-    ).ask())
-    # Double time solo tiene sentido en 4/4 (caja en 2 y 4). Guardado para
-    # cuando el compás sea configurable.
-    double_time = False
-    if BEATS_PER_BAR == 4:
-        double_time = questionary.confirm(
-            "¿Double time? (platos a corcheas y caja en 2 y 4)", default=False,
-        ).ask()
-    cymbal = CymbalEnum(questionary.select(
-        "Plato", choices=[c.value for c in CymbalEnum],
-    ).ask())
 
-    # Paso 4: Mezclador
-    _section(console, "Mezclador")
-    if questionary.confirm("¿Personalizar volumen y velocity de las pistas?", default=False).ask():
-        track_configs = {}
-        for label, key in (("Pad", "pad_config"), ("Bajo", "bass_config"),
-                           ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
-                           ("Percusión", "drums_config")):
-            velocity = int(questionary.text(f"{label} — velocity (0-127)", default="100",
-                                            validate=_int_range(0, 127),
-                                            key_bindings=_step_key_bindings(0, 127, 1, True)).ask())
-            volume = int(questionary.text(f"{label} — volumen (0-100)", default="100",
-                                          validate=_int_range(0, 100),
-                                          key_bindings=_step_key_bindings(0, 100, 1, True)).ask())
-            track_configs[key] = TrackConfig(velocity=velocity, volume=volume)
-        bass_config = track_configs["bass_config"]
-        pad_config = track_configs["pad_config"]
-        guitar_config = track_configs["guitar_config"]
-        arp_config = track_configs["arp_config"]
-        drums_config = track_configs["drums_config"]
+    def s_bpm():
+        _section(console, "Configuración Global")
+        a["bpm"] = int(_ask(questionary.text("BPM (40-240)", default="120",
+                                            validate=_int_range(40, 240),
+                                            key_bindings=_step_key_bindings(40, 240, 1, True))))
+        console.print(f"[dim]Compás: {BEATS_PER_BAR}/4 (fijo en el MVP)[/dim]")
+
+    def s_total_bars():
+        a["total_bars"] = int(_ask(questionary.text("Duración en compases (4-64)", default="4",
+                                                   validate=_int_range(4, 64),
+                                                   key_bindings=_step_key_bindings(4, 64, 1, True))))
+        console.print(f"[dim]{a['total_bars']} compases × {BEATS_PER_BAR} "
+                      f"= {a['total_bars'] * BEATS_PER_BAR} beats por estructura[/dim]")
+
+    def s_pattern_beats():
+        _section(console, "Estructura")
+        a["pattern_beats"] = float(_ask(questionary.text(
+            "Duración del patrón en beats (ej. 3, 5, 7, 9.5)",
+            default="7.0", validate=_validate_pattern_beats,
+            key_bindings=_step_key_bindings(0.25, 32.0, 0.25, False),
+        )))
+        _show_polymetry_preview(console, a["total_bars"], a["pattern_beats"])
+
+    def s_repetitions():
+        a["repetitions"] = int(_ask(questionary.text(
+            "Número de loops (1-8)", default="2", validate=_int_range(1, 8),
+            key_bindings=_step_key_bindings(1, 8, 1, True),
+        )))
+
+    def s_pad_breath():
+        a["pad_breath_bars"] = int(_ask(questionary.text(
+            "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
+            default="0", validate=_int_range(0, 8),
+            key_bindings=_step_key_bindings(0, 8, 1, True),
+        )))
+
+    def s_pad_mode():
+        a["pad_mode"] = PadMode(_ask(questionary.select(
+            "Modo del Pad", choices=[m.value for m in PadMode],
+        )))
+
+    def s_pad_register():
+        a["pad_register"] = PadRegister(_ask(questionary.select(
+            "Registro del Pad", choices=[r.value for r in PadRegister],
+        )))
+
+    def s_tonic():
+        _section(console, "Reglas Algorítmicas")
+        a["tonic"] = TonicEnum(_ask(questionary.select(
+            "Nota central (tónica)", choices=[t.value for t in TonicEnum],
+        )))
+
+    def s_scale():
+        a["scale"] = ScaleEnum(_ask(questionary.select(
+            "Escala", choices=[s.value for s in ScaleEnum],
+        )))
+
+    def s_durations():
+        while True:
+            selected = _ask(questionary.checkbox(
+                "Duraciones permitidas", choices=duration_choices,
+            ))
+            if selected:
+                a["allowed_durations"] = selected
+                return
+            console.print("[yellow]Selecciona al menos una duración.[/yellow]")
+
+    def s_max_jump():
+        a["max_jump"] = int(_ask(questionary.text("Salto melódico máximo (1-5)", default="3",
+                                                 validate=_int_range(1, 5),
+                                                 key_bindings=_step_key_bindings(1, 5, 1, True))))
+
+    def s_density():
+        a["density"] = DensityEnum(_ask(questionary.select(
+            "Densidad", choices=[d.value for d in DensityEnum],
+        )))
+
+    def s_tonic_recurrence():
+        a["tonic_recurrence"] = TonicRecurrence(_ask(questionary.select(
+            "Recurrencia de tónica", choices=[r.value for r in TonicRecurrence],
+            default=TonicRecurrence.MEDIUM.value,
+        )))
+
+    def s_double_time():
+        # Double time solo tiene sentido en 4/4 (caja en 2 y 4). Guardado para
+        # cuando el compás sea configurable.
+        double_time = False
+        if BEATS_PER_BAR == 4:
+            double_time = _ask(questionary.confirm(
+                "¿Double time? (platos a corcheas y caja en 2 y 4)", default=False,
+            ))
+        a["double_time"] = double_time
+
+    def s_cymbal():
+        a["cymbal"] = CymbalEnum(_ask(questionary.select(
+            "Plato", choices=[c.value for c in CymbalEnum],
+        )))
+
+    mixer_keys = (("Pad", "pad_config"), ("Bajo", "bass_config"),
+                  ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
+                  ("Percusión", "drums_config"))
+
+    def s_mixer():
+        _section(console, "Mezclador")
+        if not _ask(questionary.confirm("¿Personalizar volumen y velocity de las pistas?", default=False)):
+            a["mixer"] = None
+            return
+
+        values: dict = {}
+
+        def make_velocity(label, key):
+            def step():
+                values[f"{key}_velocity"] = int(_ask(questionary.text(
+                    f"{label} — velocity (0-127)", default="100",
+                    validate=_int_range(0, 127),
+                    key_bindings=_step_key_bindings(0, 127, 1, True),
+                )))
+            return step
+
+        def make_volume(label, key):
+            def step():
+                values[f"{key}_volume"] = int(_ask(questionary.text(
+                    f"{label} — volumen (0-100)", default="100",
+                    validate=_int_range(0, 100),
+                    key_bindings=_step_key_bindings(0, 100, 1, True),
+                )))
+            return step
+
+        mixer_steps = []
+        for label, key in mixer_keys:
+            mixer_steps.append(make_velocity(label, key))
+            mixer_steps.append(make_volume(label, key))
+
+        if _run_steps(mixer_steps):
+            raise _Back
+
+        a["mixer"] = {key: TrackConfig(velocity=values[f"{key}_velocity"],
+                                       volume=values[f"{key}_volume"])
+                      for _, key in mixer_keys}
+
+    def s_variations():
+        _section(console, "Lote")
+        a["variations"] = int(_ask(questionary.text("Variaciones a generar (1-5)", default="1",
+                                                   validate=_int_range(1, 5),
+                                                   key_bindings=_step_key_bindings(1, 5, 1, True))))
+
+    steps = [s_bpm, s_total_bars, s_pattern_beats, s_repetitions, s_pad_breath,
+             s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
+             s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_mixer, s_variations]
+
+    if _run_steps(steps):
+        return None
+
+    if a.get("mixer"):
+        bass_config = a["mixer"]["bass_config"]
+        pad_config = a["mixer"]["pad_config"]
+        guitar_config = a["mixer"]["guitar_config"]
+        arp_config = a["mixer"]["arp_config"]
+        drums_config = a["mixer"]["drums_config"]
     else:
         bass_config = pad_config = guitar_config = arp_config = drums_config = TrackConfig()
 
-    # Paso 5: Lote
-    _section(console, "Lote")
-    variations = int(questionary.text("Variaciones a generar (1-5)", default="1",
-                                      validate=_int_range(1, 5),
-                                      key_bindings=_step_key_bindings(1, 5, 1, True)).ask())
-
     config = SongConfig(
-        bpm=bpm,
-        total_bars=total_bars,
-        repetitions=repetitions,
-        pattern_beats=pattern_beats,
-        pad_breath_bars=pad_breath_bars,
-        tonic=tonic,
-        scale=scale,
-        allowed_durations=allowed_durations,
-        max_jump=max_jump,
-        density=density,
-        tonic_recurrence=tonic_recurrence,
-        pad_mode=pad_mode,
-        pad_register=pad_register,
+        bpm=a["bpm"],
+        total_bars=a["total_bars"],
+        repetitions=a["repetitions"],
+        pattern_beats=a["pattern_beats"],
+        pad_breath_bars=a["pad_breath_bars"],
+        tonic=a["tonic"],
+        scale=a["scale"],
+        allowed_durations=a["allowed_durations"],
+        max_jump=a["max_jump"],
+        density=a["density"],
+        tonic_recurrence=a["tonic_recurrence"],
+        pad_mode=a["pad_mode"],
+        pad_register=a["pad_register"],
         bass_config=bass_config,
         pad_config=pad_config,
         arp_config=arp_config,
         guitar_config=guitar_config,
         drums_config=drums_config,
-        double_time=double_time,
-        cymbal=cymbal,
+        double_time=a["double_time"],
+        cymbal=a["cymbal"],
     )
-    return config, variations
+    return config, a["variations"]
 
 
 def _show_summary(console: Console, config: SongConfig, seq) -> None:
@@ -411,7 +501,11 @@ def run() -> None:
     console = Console(theme=THEME)
     _show_header(console)
     while True:
-        config, variations = _collect_config(console)
+        collected = _collect_config(console)
+        if collected is None:
+            console.print("[cyan]¡Hasta pronto![/cyan]")
+            break
+        config, variations = collected
         with _progress(console) as progress:
             task = progress.add_task("[cyan]Generando variaciones...", total=variations)
             sequences = []
