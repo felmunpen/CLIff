@@ -4,7 +4,7 @@ import random
 import unittest
 
 from cliff import engine_math
-from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, beats_to_ticks
+from cliff.models import DensityEnum, ScaleEnum, SongConfig, TonicEnum, TonicRecurrence, beats_to_ticks
 
 TICKS = 480
 
@@ -19,9 +19,66 @@ class TestRhythmPattern(unittest.TestCase):
                 durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
                 self.assertEqual(len(durations), target)
                 self.assertEqual(sum(durations), pattern_ticks)
-                # todas menos la última deben pertenecer al pool permitido
-                for d in durations[:-1]:
+                # todas las notas (incluida la última) deben pertenecer al pool
+                for d in durations:
                     self.assertIn(d, allowed)
+
+    def test_last_note_in_pool(self):
+        random.seed(42)
+        allowed = [480, 360, 240, 120]
+        for pattern_ticks in (1920, 3360, 4560):
+            for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                self.assertIn(durations[-1], allowed)
+
+    def test_no_note_exceeds_max(self):
+        random.seed(42)
+        allowed = [480, 360, 240, 120]
+        for pattern_ticks in (1920, 3360, 4560):
+            for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                self.assertTrue(all(d <= max(allowed) for d in durations))
+
+    def test_property_feasible_configs(self):
+        allowed = [480, 360, 240, 120]
+        for seed in range(20):
+            random.seed(seed)
+            for pattern_ticks in (1920, 3360, 4560):
+                for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+                    target = engine_math.resolve_density(density, pattern_ticks, allowed)
+                    durations = engine_math.generate_rhythm_pattern(pattern_ticks, allowed, target)
+                    self.assertEqual(len(durations), target)
+                    self.assertEqual(sum(durations), pattern_ticks)
+                    for d in durations:
+                        self.assertIn(d, allowed)
+
+    def test_infeasible_falls_back(self):
+        # 8 notas de {480, 120} no pueden sumar 3360: el backtracking degrada al
+        # fallback, que mantiene suma y longitud exactas (la última nota puede
+        # quedar fuera del pool).
+        random.seed(1)
+        durations = engine_math.generate_rhythm_pattern(3360, [480, 120], 8)
+        self.assertEqual(len(durations), 8)
+        self.assertEqual(sum(durations), 3360)
+        for d in durations[:-1]:
+            self.assertIn(d, [480, 120])
+
+    def test_deterministic_under_seed(self):
+        random.seed(5)
+        first = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+        random.seed(5)
+        second = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+        self.assertEqual(first, second)
+
+    def test_variation_across_seeds(self):
+        results = set()
+        for seed in range(10):
+            random.seed(seed)
+            durations = engine_math.generate_rhythm_pattern(3360, [480, 360, 240, 120], 10)
+            results.add(tuple(durations))
+        self.assertGreater(len(results), 1)
 
 
 class TestMelody(unittest.TestCase):
@@ -38,7 +95,8 @@ class TestSequence(unittest.TestCase):
         config = SongConfig(total_bars=8, pattern_beats=7.0)
         seq = engine_math.generate_sequence(config)
         total_ticks = config.total_bars * 4 * TICKS
-        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), total_ticks)
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes),
+                         total_ticks * config.repetitions)
 
     def test_polymetry_summary(self):
         random.seed(7)
@@ -52,7 +110,7 @@ class TestSequence(unittest.TestCase):
         random.seed(7)
         config = SongConfig(pad_breath_bars=0, pad_mode="Acorde")
         seq = engine_math.generate_sequence(config)
-        total_ticks = config.total_bars * 4 * TICKS
+        total_ticks = config.total_bars * 4 * TICKS * config.repetitions
         # acorde de 3 notas sostenido durante toda la pieza
         self.assertEqual(len(seq.pad_notes), 3)
         self.assertTrue(all(n.start_tick == 0 and n.duration_ticks == total_ticks for n in seq.pad_notes))
@@ -113,7 +171,7 @@ class TestPercussionDoubleTime(unittest.TestCase):
         seq = engine_math.generate_sequence(config)
         snare = [n for n in seq.percussion_notes if n.pitch == 38]
         bar_ticks = 4 * TICKS
-        self.assertEqual(len(snare), 16)
+        self.assertEqual(len(snare), 16 * config.repetitions)
         self.assertTrue(all(n.start_tick % bar_ticks in (TICKS, 3 * TICKS) for n in snare))
 
     def test_cymbal_pitch_override(self):
@@ -126,7 +184,7 @@ class TestPercussionDoubleTime(unittest.TestCase):
         config = SongConfig(total_bars=2)
         seq = engine_math.generate_sequence(config)
         hats = [n for n in seq.percussion_notes if n.pitch == 46]
-        self.assertEqual(len(hats), 2 * 4)
+        self.assertEqual(len(hats), 2 * 4 * config.repetitions)
 
 
 class TestGuitar(unittest.TestCase):
@@ -139,6 +197,87 @@ class TestGuitar(unittest.TestCase):
             self.assertEqual(g.pitch, b.pitch + 12)
             self.assertEqual(g.start_tick, b.start_tick)
             self.assertEqual(g.duration_ticks, b.duration_ticks)
+
+
+class TestRepetitions(unittest.TestCase):
+    def test_bass_total_is_n_times_structure(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=3)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), structure_ticks * 3)
+
+    def test_structure_resets_to_tonic(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        first_pitch = seq.bass_notes[0].pitch
+        second_starts = [n for n in seq.bass_notes if n.start_tick == structure_ticks]
+        self.assertTrue(second_starts)
+        self.assertTrue(all(n.pitch == first_pitch for n in second_starts))
+
+    def test_percussion_spans_all_bars(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, pattern_beats=7.0, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        snare = [n for n in seq.percussion_notes if n.pitch == 38]
+        self.assertEqual(len(snare), 4 * 2)  # 4 compases × 2 repeticiones
+
+    def test_pad_drone_spans_full_piece(self):
+        random.seed(7)
+        config = SongConfig(pad_breath_bars=0, pad_mode="Mono", repetitions=3)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(len(seq.pad_notes), 1)
+        self.assertEqual(seq.pad_notes[0].duration_ticks, structure_ticks * 3)
+
+    def test_repetitions_one_is_single_structure(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        self.assertEqual(sum(n.duration_ticks for n in seq.bass_notes), structure_ticks)
+
+
+class TestTonicRecurrence(unittest.TestCase):
+    def test_full_probability_forces_all_tonics(self):
+        random.seed(1)
+        indices = engine_math.generate_melody_indices(8, 3, 15, tonic_prob=1.0)
+        self.assertEqual(indices, [0] * 8)
+
+    def test_zero_probability_is_pure_walk(self):
+        random.seed(12345)
+        indices = engine_math.generate_melody_indices(6, 3, 15, tonic_prob=0.0)
+        self.assertEqual(indices, [0, 3, 5, 4, 1, 0])
+
+    def test_monotonic_tonic_count(self):
+        counts = []
+        for p in (0.0, 0.45, 1.0):
+            random.seed(12345)
+            indices = engine_math.generate_melody_indices(6, 3, 15, tonic_prob=p)
+            counts.append(sum(1 for i in indices if i == 0))
+        self.assertEqual(counts, sorted(counts))  # no decrece
+        self.assertEqual(counts[-1], 6)           # p=1.0 -> todas tónicas
+
+    def test_first_note_always_tonic_and_in_bounds(self):
+        for p in (0.0, 0.25, 0.45, 1.0):
+            random.seed(9)
+            indices = engine_math.generate_melody_indices(10, 5, 15, tonic_prob=p)
+            self.assertEqual(indices[0], 0)
+            self.assertTrue(all(0 <= i < 15 for i in indices))
+
+    def test_recurrence_increases_tonics(self):
+        # Mismo seed: el walk subyacente es idéntico, solo cambia la sobreescritura.
+        random.seed(7)
+        libre = engine_math.generate_sequence(SongConfig(tonic_recurrence=TonicRecurrence.LIBRE))
+        random.seed(7)
+        high = engine_math.generate_sequence(SongConfig(tonic_recurrence=TonicRecurrence.HIGH))
+        self.assertEqual(len(libre.bass_notes), len(high.bass_notes))
+        tonic_pitch = libre.bass_notes[0].pitch  # la tónica (índice 0)
+        libre_tonics = sum(1 for n in libre.bass_notes if n.pitch == tonic_pitch)
+        high_tonics = sum(1 for n in high.bass_notes if n.pitch == tonic_pitch)
+        self.assertGreaterEqual(high_tonics, libre_tonics)
 
 
 if __name__ == "__main__":

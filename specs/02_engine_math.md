@@ -21,12 +21,22 @@
 **Reglas:**
 - Producir **exactamente `target_notes` duraciones** (en ticks), todas del pool `allowed_ticks`.
 - La **suma total es exactamente `pattern_ticks`**.
-- Al elegir cada duración (salvo la última), debe dejar un resto rellenable por las notas restantes:
-  - `min_next = min(allowed_ticks)`, `max_next = max(allowed_ticks)`
-  - `low_bound = remaining - notas_restantes * max_next`
-  - `high_bound = remaining - notas_restantes * min_next`
-  - Elegir aleatoriamente una duración de `allowed_ticks` dentro de `[low_bound, high_bound]`.
-- La **última** duración es el resto exacto: `remaining`.
+- Se resuelve por **búsqueda con retroceso aleatorizada** (en lugar de un relleno
+  greedy que dejaba la última nota como resto gigante):
+  - `allowed = sorted(set(allowed_ticks))`, `min_next = allowed[0]`, `max_next = allowed[-1]`.
+  - En cada paso, con `notes_left` notas restantes, la duración `d` debe dejar el resto
+    rellenable por las `notes_left - 1` notas restantes, dentro de la ventana:
+    - `low_bound = remaining - (notes_left - 1) * max_next`
+    - `high_bound = remaining - (notes_left - 1) * min_next`
+  - Se barajan (`random.shuffle`) las duraciones del pool dentro de `[low_bound, high_bound]`
+    y se avanza; si un camino muere, se **retrocede** y se prueba otra candidata.
+  - Con `notes_left == 0`, solo se acepta el resultado si `remaining == 0`.
+- **Garantía:** como al quedar 1 nota `low_bound == high_bound == remaining`, la última
+  nota queda **dentro del pool** (se elimina el sesgo de la nota final larga).
+- **Fallback:** si no existe solución todo-en-pool (patrón no combinable con el pool,
+  p. ej. por no ser múltiplo del `gcd` de las duraciones), se degrada a
+  `_legacy_leftover`, donde la última nota absorbe el resto exacto (puede quedar fuera
+  del pool). La suma y la longitud se mantienen exactas.
 
 **Salida:** lista de duraciones en ticks cuya suma es exactamente `pattern_ticks`.
 
@@ -47,7 +57,7 @@
 - Tail: `build_tail_rhythm(...)` (los primeros beats del propio patrón).
 
 ### 1.4 Algoritmo Melódico (Riff)
-**Función:** `generate_melody_indices(event_count, max_jump, scale_len) -> list[int]`
+**Función:** `generate_melody_indices(event_count, max_jump, scale_len, tonic_prob=0.0) -> list[int]`
 
 **Reglas:**
 - El evento 0 es **SIEMPRE el índice 0** (tónica elegida).
@@ -58,6 +68,10 @@
   - **Bounce:**
     - Si `nuevo >= scale_len`: `ajustado = (scale_len - 1) - (nuevo - (scale_len - 1))`.
     - Si `nuevo < 0`: `ajustado = abs(nuevo)`.
+- **Recurrencia de la tónica (post-procesado):** tras generar el walk puro, se
+  recorre cada nota salvo la primera y, con probabilidad `tonic_prob`, se
+  sobreescribe a `0` (`TONIC_RECURRENCE_PROB[config.tonic_recurrence]`). No altera
+  el contorno de las notas no tocadas.
 - Retorna la lista de índices de la **frase única** (el riff).
 
 **Riff repetido (interpretación A):**
@@ -70,6 +84,8 @@
 #### A. Bass (línea melódica principal)
 - Pitch por nota: `SCALE_PITCHES[scale][indice] + TONIC_SEMITONES[tonic] + BASS_PITCH_OFFSET` (dos octavas abajo de la escala transpuesta).
 - Se combina el riff con el ritmo expandido (ciclos completos + tail).
+- La **estructura** (ciclos completos + tail) se construye una sola vez y luego se repite
+  `repetitions` veces mediante `tile_notes` (el riff resetea a tónica en cada estructura).
 - `velocity` = `bass_config.velocity` (plano).
 
 #### B. Pad
@@ -94,19 +110,31 @@
 - Duplica la línea del bajo **una octava por encima** (`pitch = bass.pitch + GUITAR_PITCH_OFFSET`, con `GUITAR_PITCH_OFFSET = 12`).
 - Mismo ritmo y duración que el bajo; `velocity` = `guitar_config.velocity`.
 
+#### F. Repetición de la estructura
+**Función:** `tile_notes(notes, repetitions, structure_ticks) -> list[NoteEvent]`
+- Repite una lista de notas (una estructura) `repetitions` veces, sumando
+  `structure_ticks` al `start_tick` de cada copia.
+- `structure_ticks` = `total_bars * BEATS_PER_BAR * TICKS_PER_BEAT` (longitud de una estructura).
+- Si `repetitions <= 1`, devuelve la lista original sin cambios.
+
 ### 1.6 Orquestación
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
 
 0. Transponer la escala según la tónica: `scale_pitches = [p + TONIC_SEMITONES[tonic] for p in SCALE_PITCHES[scale]]`.
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
-3. Generar el riff y ensamblar `bass_notes`.
-4. Construir `pad_notes`, `guitar_notes` (transposición del bajo) y `percussion_notes` (con `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
-5. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
+3. Generar el riff (con `tonic_prob = TONIC_RECURRENCE_PROB[config.tonic_recurrence]`) y
+   ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
+4. Repetir la estructura: `bass_notes = tile_notes(bass_structure, repetitions, total_ticks)`.
+5. Construir `pad_notes` (sobre `total_ticks * repetitions`), `guitar_notes` (transposición del
+   bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con
+   `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
+6. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
    (`arp_notes = []`).
 
 **Resumen (beats):**
-- `total_beats = total_bars * 4.0`
+- `total_beats = total_bars * 4.0 * repetitions`
 - `pattern_beats = config.pattern_beats`
-- `full_loops` (entero)
+- `full_loops` (entero, por estructura)
 - `tail_beats = tail_ticks / TICKS_PER_BEAT`
+- `repetitions = config.repetitions`

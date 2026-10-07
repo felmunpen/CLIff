@@ -18,6 +18,14 @@ class DensityEnum(str, Enum):
     HIGH = "Alta"
 
 
+class TonicRecurrence(str, Enum):
+    """Recurrencia de la tónica en el riff (probabilidad de que una nota se convierta en tónica)."""
+    LIBRE = "Libre"
+    LOW = "Baja"
+    MEDIUM = "Media"
+    HIGH = "Alta"
+
+
 class PadMode(str, Enum):
     MONO = "Mono"
     CHORD = "Acorde"
@@ -69,6 +77,14 @@ DENSITY_RANGES: dict[DensityEnum, tuple[int, int]] = {
     DensityEnum.LOW: (3, 4),
     DensityEnum.MEDIUM: (5, 6),
     DensityEnum.HIGH: (7, 9),
+}
+
+# Probabilidad de que una nota del riff (salvo la primera) se convierta en tónica
+TONIC_RECURRENCE_PROB: dict[TonicRecurrence, float] = {
+    TonicRecurrence.LIBRE: 0.0,
+    TonicRecurrence.LOW: 0.10,
+    TonicRecurrence.MEDIUM: 0.25,
+    TonicRecurrence.HIGH: 0.45,
 }
 
 # Desplazamiento de octava del Pad según registro (en semitonos)
@@ -159,6 +175,7 @@ class TrackConfig:
 class SongConfig:
     bpm: int = 120
     total_bars: int = 8
+    repetitions: int = 2                # nº de veces que se repite la estructura (ciclos + tail)
     pattern_beats: float = 7.0
     pad_breath_bars: int = 0            # 0 = Drone Infinito; 1-8 = re-disparo
     tonic: TonicEnum = TonicEnum.C      # nota central (tónica)
@@ -166,6 +183,7 @@ class SongConfig:
     allowed_durations: list[float] = field(default_factory=lambda: [1.0, 0.5, 0.25])
     max_jump: int = 3
     density: DensityEnum = DensityEnum.MEDIUM
+    tonic_recurrence: TonicRecurrence = TonicRecurrence.MEDIUM
     pad_mode: PadMode = PadMode.CHORD
     pad_register: PadRegister = PadRegister.LOW
     bass_config: TrackConfig = field(default_factory=TrackConfig)
@@ -197,6 +215,7 @@ class SequenceData:
     pattern_beats: float
     full_loops: int
     tail_beats: float
+    repetitions: int                    # veces que se repite la estructura completa
     pad_notes: list[NoteEvent]
     bass_notes: list[NoteEvent]
     arp_notes: list[NoteEvent]          # vacía en MVP (pista fantasma)

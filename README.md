@@ -12,6 +12,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 ## 🎵 Características Principales
 
 *   **Motor de Polimetría y Residuo:** Define la duración del patrón principal en *beats* asimétricos. CLIff repite el patrón y calcula un remate (*tail*) truncado para completar la métrica global sin descarrilar el compás.
+*   **Repetición de la Estructura:** Repite la estructura completa (ciclos + tail) **N veces** (2 por defecto) para poder observar el efecto del truncamiento del residuo al reiniciar cada estructura en la tónica.
 *   **5 Pistas Autogeneradas:**
     *   **Pad:** Sostén armónico sobre la tónica. Incluye modo *Drone Infinito* (respiración = 0), modo *Mono/Acorde* y registro *Grave/Agudo*.
     *   **Bajo:** Ejecuta la línea melódica principal (el *riff*) generada por el algoritmo.
@@ -19,11 +20,12 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
     *   **Arpegiador:** Pista reservada para una feature futura (fantasma en el MVP).
     *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y plato en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Plato configurable (hi-hat abierto/cerrado, ride, crash o china) y opción *double time* (caja en 2 y 4 y plato en corcheas).
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
+*   **Recurrencia de tónica:** Regula con qué probabilidad las notas del riff vuelven a la tónica (Libre/Baja/Media/Alta), superponiendo acentos de tónica sin alterar el contorno melódico.
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
 *   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
 
-> **Nota (caso límite de densidad):** si la duración del patrón es menor que la menor duración permitida seleccionada (p. ej. patrón de `0.25` beats con solo la Negra habilitada), la combinación es infactible para el rango de densidad y la última nota se ajustará al resto exacto, pudiendo quedar fuera del pool de duraciones elegido. No se tratará por ahora.
+> **Nota (caso límite de densidad):** el motor rellena el patrón por *backtracking* para que **todas** las notas (incluida la última) pertenezcan al pool de duraciones elegido. Solo cuando el patrón **no es combinable** con esas duraciones (p. ej. un total no múltiplo del `gcd` de las duraciones permitidas), el motor degrada a un *fallback* en el que la última nota absorbe el resto exacto, pudiendo quedar fuera del pool. La suma y la cantidad de notas se mantienen siempre exactas.
 
 ---
 
@@ -76,8 +78,8 @@ python main.py
 Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
-2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
-3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
+2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), el número de *loops*, la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
+3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china) y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).
 6.  **Generación:** Genera las piezas y, desde el resumen, usa **💾 Exportar** para guardar los archivos `.mid` en `/output` (o en la carpeta que elijas).
@@ -95,8 +97,6 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 ---
 
 ## 🗺️ Feature Futuras (Roadmap)
-
-> **Próximo (próxima sesión):** hacer que la pieza dure **N veces** (2 por defecto), repitiendo la estructura completa (ciclos + tail) para poder observar el efecto del truncamiento en el tail.
 
 1. Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos.
 2. Algoritmos de variación dinámica de *velocity* y silencios rítmicos.

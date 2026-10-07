@@ -16,6 +16,7 @@ from .models import (
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
     TICKS_PER_BEAT,
+    TONIC_RECURRENCE_PROB,
     TONIC_SEMITONES,
     CymbalEnum,
     DensityEnum,
@@ -36,27 +37,57 @@ def resolve_density(density: DensityEnum, pattern_ticks: int, allowed_ticks: lis
     return max(min_notes, min(target, max_notes))
 
 
-def generate_rhythm_pattern(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
-    """Genera exactamente `target_notes` duraciones (ticks) que suman `pattern_ticks`.
+def _legacy_leftover(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
+    """Fallback cuando no existe solución todo-en-pool (patrón no combinable).
 
-    Las duraciones intermedias se eligen del pool; la última es el resto exacto
-    (ajuste dinámico) para cuadrar la suma sin desviación.
+    Reproduce el comportamiento anterior: la última nota absorbe el resto exacto,
+    que puede quedar fuera del pool de duraciones permitidas.
     """
     durations: list[int] = []
     remaining = pattern_ticks
     min_next = min(allowed_ticks)
     for i in range(target_notes):
         if i == target_notes - 1:
-            durations.append(remaining)  # resto exacto
+            durations.append(remaining)
         else:
             notes_left = target_notes - 1 - i
-            # reservar al menos min_next para cada nota restante
             cap = remaining - notes_left * min_next
             candidates = [d for d in allowed_ticks if d <= cap]
             d = random.choice(candidates if candidates else [min_next])
             durations.append(d)
             remaining -= d
     return durations
+
+
+def generate_rhythm_pattern(pattern_ticks: int, allowed_ticks: list[int], target_notes: int) -> list[int]:
+    """Genera exactamente `target_notes` duraciones (ticks) que suman `pattern_ticks`.
+
+    Búsqueda con retroceso aleatorizada: en cada paso se sortean las duraciones que
+    dejan el resto rellenable por las notas restantes y se retrocede si un camino
+    muere. Así todas las notas (incluida la última) pertenecen al pool. Si no existe
+    solución (patrón no combinable con el pool), se degrada a `_legacy_leftover`.
+    """
+    allowed = sorted(set(allowed_ticks))
+    min_next = allowed[0]
+    max_next = allowed[-1]
+
+    def search(remaining: int, notes_left: int, acc: list[int]):
+        if notes_left == 0:
+            return acc if remaining == 0 else None
+        low_bound = remaining - (notes_left - 1) * max_next
+        high_bound = remaining - (notes_left - 1) * min_next
+        candidates = [d for d in allowed if low_bound <= d <= high_bound]
+        random.shuffle(candidates)
+        for d in candidates:
+            found = search(remaining - d, notes_left - 1, acc + [d])
+            if found is not None:
+                return found
+        return None
+
+    solution = search(pattern_ticks, target_notes, [])
+    if solution is not None:
+        return solution
+    return _legacy_leftover(pattern_ticks, allowed, target_notes)
 
 
 def build_tail_rhythm(pattern_rhythm_ticks: list[int], tail_ticks: int) -> list[int]:
@@ -74,8 +105,15 @@ def build_tail_rhythm(pattern_rhythm_ticks: list[int], tail_ticks: int) -> list[
     return result
 
 
-def generate_melody_indices(event_count: int, max_jump: int, scale_len: int) -> list[int]:
-    """Genera una frase (riff) de `event_count` índices, empezando SIEMPRE en 0."""
+def generate_melody_indices(event_count: int, max_jump: int, scale_len: int,
+                            tonic_prob: float = 0.0) -> list[int]:
+    """Genera una frase (riff) de `event_count` índices, empezando SIEMPRE en 0.
+
+    Primero se genera el random walk puro (dirección ±1, paso 1..max_jump, rebote
+    en bordes). Después, cada nota (salvo la primera, ya tónica) se sobreescribe a
+    0 con probabilidad `tonic_prob`, superponiendo la recurrencia de la tónica sin
+    alterar el contorno de las notas no tocadas.
+    """
     indices = [0]
     for _ in range(1, event_count):
         direction = random.choice([1, -1])
@@ -86,6 +124,9 @@ def generate_melody_indices(event_count: int, max_jump: int, scale_len: int) -> 
         elif new < 0:
             new = abs(new)
         indices.append(new)
+    for i in range(1, event_count):
+        if random.random() < tonic_prob:
+            indices[i] = 0
     return indices
 
 
@@ -177,6 +218,20 @@ def build_guitar_notes(bass_notes, velocity) -> list[NoteEvent]:
     ]
 
 
+def tile_notes(notes: list[NoteEvent], repetitions: int, structure_ticks: int) -> list[NoteEvent]:
+    """Repite una estructura (lista de notas) `repetitions` veces, desplazando cada
+    copia `structure_ticks` ticks. Devuelve la misma lista si `repetitions == 1`."""
+    if repetitions <= 1:
+        return notes
+    result: list[NoteEvent] = []
+    for r in range(repetitions):
+        offset = r * structure_ticks
+        for n in notes:
+            result.append(NoteEvent(pitch=n.pitch, start_tick=n.start_tick + offset,
+                                    duration_ticks=n.duration_ticks, velocity=n.velocity))
+    return result
+
+
 def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
     """Devuelve (full_loops, tail_ticks) en ticks enteros.
 
@@ -192,7 +247,8 @@ def polymetry_summary(total_bars: int, pattern_beats: float) -> tuple[int, int]:
 
 def generate_sequence(config: SongConfig) -> SequenceData:
     """Orquesta el cálculo completo y devuelve un `SequenceData`."""
-    total_ticks = config.total_bars * BEATS_PER_BAR * TICKS_PER_BEAT
+    total_ticks = config.total_bars * BEATS_PER_BAR * TICKS_PER_BEAT  # una estructura
+    piece_ticks = total_ticks * config.repetitions
     allowed_ticks = [beats_to_ticks(d) for d in config.allowed_durations]
     pattern_ticks = beats_to_ticks(config.pattern_beats)
 
@@ -203,27 +259,32 @@ def generate_sequence(config: SongConfig) -> SequenceData:
     tail_rhythm_ticks = build_tail_rhythm(pattern_rhythm_ticks, tail_ticks)
 
     scale_pitches = [p + TONIC_SEMITONES[config.tonic] for p in SCALE_PITCHES[config.scale]]
-    riff = generate_melody_indices(len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches))
+    riff = generate_melody_indices(
+        len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches),
+        TONIC_RECURRENCE_PROB[config.tonic_recurrence],
+    )
 
-    bass_notes = build_bass_notes(
+    bass_structure = build_bass_notes(
         pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, pattern_ticks,
         scale_pitches, config.bass_config.velocity,
     )
+    bass_notes = tile_notes(bass_structure, config.repetitions, total_ticks)
     pad_notes = build_pad_notes(
-        scale_pitches, config.pad_mode, config.pad_register, total_ticks,
+        scale_pitches, config.pad_mode, config.pad_register, piece_ticks,
         config.pad_breath_bars, config.pad_config.velocity,
     )
     guitar_notes = build_guitar_notes(bass_notes, config.guitar_config.velocity)
     percussion_notes = build_percussion_notes(
-        bass_notes, config.total_bars, config.drums_config.velocity, config.double_time,
-        CYMBAL_PITCHES[config.cymbal],
+        bass_notes, config.total_bars * config.repetitions, config.drums_config.velocity,
+        config.double_time, CYMBAL_PITCHES[config.cymbal],
     )
 
     return SequenceData(
-        total_beats=config.total_bars * BEATS_PER_BAR,
+        total_beats=config.total_bars * BEATS_PER_BAR * config.repetitions,
         pattern_beats=config.pattern_beats,
         full_loops=full_loops,
         tail_beats=tail_ticks / TICKS_PER_BEAT,
+        repetitions=config.repetitions,
         pad_notes=pad_notes,
         bass_notes=bass_notes,
         arp_notes=[],

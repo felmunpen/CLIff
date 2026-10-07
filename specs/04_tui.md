@@ -9,9 +9,10 @@
    - `bpm`: Entero (40–240, default 120).
    - Se muestra el compás actual (`4/4`, fijo en el MVP) antes de pedir los compases.
    - `total_bars`: Entero (4–64, default 8).
-   - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats totales`.
+   - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats por estructura`.
 3. **Paso 2: Polimetría y Pad**
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
+   - `repetitions` ("Número de loops"): Entero (1–8, default 2). Nº de veces que se repite la estructura completa (ciclos completos + tail) para observar el truncamiento.
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
    - `pad_mode`: Select (`Mono`, `Acorde`).
    - `pad_register`: Select (`Grave`, `Agudo`).
@@ -21,6 +22,7 @@
    - `allowed_durations`: Checkbox (`Negra [1.0]`, `Corchea con puntillo [0.75]`, `Corchea [0.5]`, `Semicorchea [0.25]`).
    - `max_jump`: Slider/Int (1–5).
    - `density`: Select (`Baja`, `Media`, `Alta`).
+   - `tonic_recurrence`: Select (`Libre`, `Baja`, `Media`, `Alta`) — recurrencia de la tónica en el riff.
    - `cymbal`: Select (`Hi-hat abierto`, `Hi-hat cerrado`, `Ride`, `Crash`, `China`).
    - `double_time`: Confirm y/n (solo 4/4) — plato a corcheas y caja en 2 y 4.
 5. **Paso 4: Mezclador**
@@ -39,8 +41,8 @@
 Tras completar el **Paso 2** (cuando ya se conocen `total_bars` y `pattern_beats`),
 la TUI muestra una previsualización calculada con `engine_math.polymetry_summary`:
 
-1. **Total de beats:** `total_bars × BEATS_PER_BAR` (con su equivalencia en compases).
-2. **Mapa gráfico:** una barra de bloques que representa la pieza completa:
+1. **Total de beats:** `total_bars × BEATS_PER_BAR` por estructura (con su equivalencia en compases).
+2. **Mapa gráfico:** una barra de bloques que representa **una estructura**:
    - Los **ciclos completos** del patrón se dibujan en **cian**.
    - El **tail** final se dibuja en **amarillo**.
    - **Separación:** los bloques se separan con un espacio simple (sin corchetes).
@@ -54,7 +56,7 @@ la TUI muestra una previsualización calculada con `engine_math.polymetry_summar
 Ejemplo (8 compases en 4/4, patrón de 7 beats):
 
 ```text
-32 beats totales (8 compases × 4)
+32 beats por estructura (8 compases × 4)
 ███████ ███████ ███████ ███████ ████
 4 ciclos completos + tail de 4 beats
 ```
@@ -67,10 +69,11 @@ Tras generar, se muestra el desglose matemático y las acciones disponibles:
 ┌──────────────────────────────────────────────────────────┐
 │ CLIff — Resumen de Polimetría Calculada                  │
 ├──────────────────────────────────────────────────────────┤
-│ Beats Totales: 32.0 (8 compases en 4/4)                  │
+│ Beats por Estructura: 32.0 (8 compases en 4/4)           │
+│ Loops: 2                                                 │
 │ Duración del Patrón: 7.0 beats                           │
-│ Repeticiones Completas: 4 ciclos (28.0 beats)            │
-│ Residuo (Tail): 4.0 beats                                │
+│ Ciclos Completos (por estructura): 4 ciclos (28.0 beats) │
+│ Residuo / Tail (por estructura): 4.0 beats               │
 └──────────────────────────────────────────────────────────┘
 
 Acciones:
