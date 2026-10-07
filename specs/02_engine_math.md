@@ -8,12 +8,18 @@
 ### 1.1 Resolución de Densidad
 **Función:** `resolve_density(density, pattern_ticks, allowed_ticks) -> int`
 
-1. Tomar el rango objetivo `(lo, hi) = DENSITY_RANGES[density]`.
-2. Calcular la factibilidad:
+1. Calcular el rango factible `[min_notes, max_notes]`:
    - `min_notes = ceil(pattern_ticks / max(allowed_ticks))`
    - `max_notes = floor(pattern_ticks / min(allowed_ticks))`
-3. Elegir `target = random.randint(lo, hi)`.
-4. **Clamp:** devolver `max(min_notes, min(target, max_notes))`.
+2. Interpretar el nivel de densidad como una fracción de ese rango
+   (`DENSITY_FRACTIONS`: Baja 0.25, Media 0.5, Alta 0.8):
+   - `target = min_notes + round(fraction * (max_notes - min_notes))`.
+3. Devolver `max(min_notes, min(target, max_notes))`.
+
+> La densidad es **relativa a la factibilidad**, de modo que los tres niveles se
+> distinguen para cualquier longitud de patrón y pool de duraciones (evita que
+> Baja/Media colapsen a `min_notes` —p. ej. "todo negras"— cuando la negra está
+> en el pool).
 
 ### 1.2 Generación del Patrón Rítmico
 **Función:** `generate_rhythm_pattern(pattern_ticks, allowed_ticks, target_notes) -> list[int]`

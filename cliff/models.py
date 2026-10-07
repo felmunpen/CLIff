@@ -72,11 +72,12 @@ DURATION_OPTIONS: list[tuple[str, float]] = [
     ("Semicorchea", 0.25),
 ]
 
-# Rango de notas objetivo (densidad) del patrón principal por nivel
-DENSITY_RANGES: dict[DensityEnum, tuple[int, int]] = {
-    DensityEnum.LOW: (3, 4),
-    DensityEnum.MEDIUM: (5, 6),
-    DensityEnum.HIGH: (7, 9),
+# Fracción del rango factible [min_notes, max_notes] que usa cada nivel de
+# densidad para fijar el número de notas objetivo (relativo a la factibilidad).
+DENSITY_FRACTIONS: dict[DensityEnum, float] = {
+    DensityEnum.LOW: 0.25,
+    DensityEnum.MEDIUM: 0.5,
+    DensityEnum.HIGH: 0.8,
 }
 
 # Probabilidad de que una nota del riff (salvo la primera) se convierta en tónica

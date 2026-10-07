@@ -11,7 +11,7 @@ from .models import (
     BASS_PITCH_OFFSET,
     BEATS_PER_BAR,
     CYMBAL_PITCHES,
-    DENSITY_RANGES,
+    DENSITY_FRACTIONS,
     GUITAR_PITCH_OFFSET,
     PAD_REGISTER_OFFSET,
     SCALE_PITCHES,
@@ -29,11 +29,18 @@ from .models import (
 
 
 def resolve_density(density: DensityEnum, pattern_ticks: int, allowed_ticks: list[int]) -> int:
-    """Devuelve el número de notas objetivo, acotado a la factibilidad."""
-    lo, hi = DENSITY_RANGES[density]
+    """Devuelve el número de notas objetivo, relativo al rango factible.
+
+    El rango factible es `[min_notes, max_notes]`, donde `min_notes` es el
+    mínimo número de notas para rellenar el patrón con la duración más larga y
+    `max_notes` el máximo con la más corta. El nivel de densidad se interpreta
+    como una fracción de ese rango (`DENSITY_FRACTIONS`), de modo que los tres
+    niveles se distinguen para cualquier longitud de patrón y pool de duraciones.
+    """
     min_notes = math.ceil(pattern_ticks / max(allowed_ticks))
     max_notes = math.floor(pattern_ticks / min(allowed_ticks))
-    target = random.randint(lo, hi)
+    fraction = DENSITY_FRACTIONS[density]
+    target = min_notes + round(fraction * (max_notes - min_notes))
     return max(min_notes, min(target, max_notes))
 
 

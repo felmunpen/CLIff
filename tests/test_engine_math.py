@@ -81,6 +81,33 @@ class TestRhythmPattern(unittest.TestCase):
         self.assertGreater(len(results), 1)
 
 
+class TestDensityResolution(unittest.TestCase):
+    def test_no_all_quarter_collapse(self):
+        # Regresión: con negra en el pool, ningún nivel debe colapsar a
+        # "todo negras" (una única duración).
+        allowed = [480, 240, 120]
+        for density in (DensityEnum.LOW, DensityEnum.MEDIUM, DensityEnum.HIGH):
+            random.seed(42)
+            target = engine_math.resolve_density(density, 3360, allowed)
+            durations = engine_math.generate_rhythm_pattern(3360, allowed, target)
+            self.assertEqual(sum(durations), 3360)
+            self.assertGreater(len(set(durations)), 1,
+                               msg=f"{density} colapsó a una única duración")
+
+    def test_levels_are_ordered(self):
+        # A mayor densidad, más notas objetivo.
+        allowed = [480, 240, 120]
+        low = engine_math.resolve_density(DensityEnum.LOW, 3360, allowed)
+        med = engine_math.resolve_density(DensityEnum.MEDIUM, 3360, allowed)
+        high = engine_math.resolve_density(DensityEnum.HIGH, 3360, allowed)
+        self.assertLessEqual(low, med)
+        self.assertLessEqual(med, high)
+
+    def test_single_duration_pool_is_exact(self):
+        # Con una única duración, el objetivo es exactamente pattern_ticks / dur.
+        self.assertEqual(engine_math.resolve_density(DensityEnum.MEDIUM, 3360, [480]), 7)
+
+
 class TestMelody(unittest.TestCase):
     def test_starts_at_tonic_and_in_bounds(self):
         random.seed(1)
