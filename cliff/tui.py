@@ -234,6 +234,11 @@ def _collect_config(console: Console):
             key_bindings=_step_key_bindings(1, 8, 1, True),
         )))
 
+    def s_intro():
+        a["intro"] = _ask(questionary.confirm(
+            "¿Intro de 4 golpes de hi-hat?", default=False,
+        ))
+
     def s_pad_breath():
         a["pad_breath_bars"] = int(_ask(questionary.text(
             "Respiración del Pad en compases (0 = Drone Infinito, 1-8)",
@@ -375,8 +380,8 @@ def _collect_config(console: Console):
                                                    validate=_int_range(1, 5),
                                                    key_bindings=_step_key_bindings(1, 5, 1, True))))
 
-    steps = [s_bpm, s_total_bars, s_pattern_beats, s_tail_vary, s_repetitions, s_pad_breath,
-             s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
+    steps = [s_bpm, s_total_bars, s_pattern_beats, s_tail_vary, s_repetitions, s_intro,
+             s_pad_breath, s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
              s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_cymbal_vary,
              s_fill, s_mixer, s_variations]
 
@@ -416,6 +421,7 @@ def _collect_config(console: Console):
         cymbal_vary=a["cymbal_vary"],
         tail_vary=a["tail_vary"],
         fill=a["fill"],
+        intro=a["intro"],
     )
     return config, a["variations"]
 
@@ -450,6 +456,7 @@ def _show_summary(console: Console, config: SongConfig, seq) -> None:
     main.add_row("Double time", "Sí" if config.double_time else "No")
     main.add_row("Tail", "Variación melódica" if config.tail_vary else "Truncado")
     main.add_row("Fill entre loops", "Sí" if config.fill else "No")
+    main.add_row("Intro", "4 golpes hi-hat" if config.intro else "No")
 
     mixer = Table(box=box.SIMPLE, title="Mezclador", border_style="dim")
     mixer.add_column("Pista", style="bold")

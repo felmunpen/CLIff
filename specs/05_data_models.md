@@ -173,6 +173,7 @@ class SongConfig:
     cymbal_vary: bool = False           # variar el plato (aleatorio) en cada loop si repetitions > 1
     tail_vary: bool = False             # tail con melodía nueva (mismo ritmo, tónica inicial)
     fill: bool = False                  # fill (roll de caja + plato_alt) entre loops
+    intro: bool = False                 # count-in de 4 golpes de hi-hat antes de la pieza
 
 @dataclass
 class NoteEvent:
@@ -199,6 +200,7 @@ class SequenceData:
     arp_notes: list[NoteEvent]          # vacía en MVP (pista fantasma)
     guitar_notes: list[NoteEvent]       # sigue al bajo una octava arriba
     percussion_notes: list[NoteEvent]
+    intro_beats: float = 0.0            # beats del intro (count-in) antes de la pieza
 ```
 
 ## 2. Reglas de Validación (aplicadas en la TUI)

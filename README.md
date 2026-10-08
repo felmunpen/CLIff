@@ -23,6 +23,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 *   **Recurrencia de tónica:** Regula con qué probabilidad las notas del riff vuelven a la tónica (Libre/Baja/Media/Alta), superponiendo acentos de tónica sin alterar el contorno melódico.
 *   **Tail con variación melódica:** Opcionalmente, el tail conserva el ritmo truncado y la tónica inicial pero usa una melodía propia (pitches distintos), en lugar de repetir el inicio del riff.
 *   **Fill entre loops:** Opcionalmente, un roll de caja (semicorcheas) en el último beat de cada loop y un `plato_alt` en el downbeat del siguiente como transición (con variación de plato, eco del plato saliente).
+*   **Intro (count-in):** Opcionalmente, 4 golpes de hi-hat en negras antes de que entre la pieza.
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
 *   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
@@ -80,8 +81,8 @@ python main.py
 Flujo de uso en la terminal:
 
 1.  **Ajustes Globales:** Introduce el tempo (BPM) y la cantidad de compases.
-2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), el número de *loops*, la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
-3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china), si quieres que el plato varíe en cada loop y, solo en 4/4, si quieres activar el *double time*.
+2.  **Estructura del Patrón:** Define la duración del patrón (en *beats*), si quieres variar la melodía del tail, el número de *loops*, si quieres un intro de 4 golpes de hi-hat, la respiración del Pad (`0` para *Drone Infinito*), el modo (Mono/Acorde) y el registro (Grave/Agudo) del Pad.
+3.  **Reglas Algorítmicas:** Selecciona la nota central (tónica), la escala, las duraciones permitidas, el salto melódico máximo, la densidad (Baja/Media/Alta), la recurrencia de la tónica (Libre/Baja/Media/Alta), el plato (hi-hat abierto/cerrado, ride, crash o china), si quieres que el plato varíe en cada loop, si quieres un fill entre loops y, solo en 4/4, si quieres activar el *double time*.
 4.  **Mezclador (opcional):** Decide si quieres ajustar *velocity* y volumen por pista (por defecto se usan valores neutros).
 5.  **Lote:** Indica cuántas variaciones generar (1-5).
 6.  **Generación:** Genera las piezas y, desde el resumen, usa **💾 Exportar** para guardar los archivos `.mid` en `/output` (o en la carpeta que elijas).
@@ -110,4 +111,4 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 8. Selección de instrumento por pista.
 9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
 10. ~~Fill rítmico entre loops~~ (roll de caja + plato_alt).
-11. Intros configurables (cuatro golpes de hi-hat, drone suave o el propio tail).
+11. ~~Intros configurables~~ (count-in de 4 golpes de hi-hat).

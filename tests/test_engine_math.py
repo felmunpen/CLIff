@@ -425,6 +425,32 @@ class TestFill(unittest.TestCase):
             self.assertEqual(sum(1 for n in at_boundary if n.pitch == leaving_main), 1)
 
 
+class TestIntro(unittest.TestCase):
+    def test_no_intro_by_default(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        self.assertEqual(seq.intro_beats, 0.0)
+        self.assertEqual(seq.bass_notes[0].start_tick, 0)
+
+    def test_intro_shifts_piece_and_adds_hihat(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=2, intro=True)
+        seq = engine_math.generate_sequence(config)
+        intro_ticks = 4 * TICKS
+        self.assertEqual(seq.intro_beats, 4.0)
+        self.assertEqual(seq.bass_notes[0].start_tick, intro_ticks)
+        hihat = [n for n in seq.percussion_notes if n.pitch == 46 and n.start_tick < intro_ticks]
+        self.assertEqual([n.start_tick for n in hihat], [0, TICKS, 2 * TICKS, 3 * TICKS])
+
+    def test_intro_preserves_guitar_relationship(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=2, intro=True)
+        seq = engine_math.generate_sequence(config)
+        self.assertEqual(seq.guitar_notes[0].start_tick, seq.bass_notes[0].start_tick)
+        self.assertEqual(seq.guitar_notes[0].pitch, seq.bass_notes[0].pitch + 12)
+
+
 class TestCymbalVariation(unittest.TestCase):
     def _loop_pitches(self, seq, structure_ticks):
         cymbal_pitches = set(CYMBAL_PITCHES.values())

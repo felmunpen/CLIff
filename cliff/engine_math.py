@@ -287,6 +287,25 @@ def build_fill_notes(total_bars, repetitions, loop_cymbals, cymbal_vary, velocit
     return notes
 
 
+def offset_notes(notes: list[NoteEvent], ticks: int) -> list[NoteEvent]:
+    """Desplaza todas las notas `ticks` ticks a la derecha (nueva lista)."""
+    return [
+        NoteEvent(pitch=n.pitch, start_tick=n.start_tick + ticks,
+                  duration_ticks=n.duration_ticks, velocity=n.velocity)
+        for n in notes
+    ]
+
+
+def build_intro_notes(velocity, cymbal_pitch=CYMBAL_PITCHES[CymbalEnum.OPEN_HI_HAT]) -> list[NoteEvent]:
+    """Count-in: 4 golpes de hi-hat en negras (1 compás) antes de la pieza."""
+    hit = 120
+    return [
+        NoteEvent(pitch=cymbal_pitch, start_tick=i * TICKS_PER_BEAT,
+                  duration_ticks=hit, velocity=velocity)
+        for i in range(4)
+    ]
+
+
 def build_guitar_notes(bass_notes, velocity) -> list[NoteEvent]:
     """Duplica la línea del bajo una octava por encima (C2) para la guitarra."""
     return [
@@ -379,6 +398,18 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         )
         percussion_notes.sort(key=lambda n: n.start_tick)
 
+    intro_beats = 0.0
+    if config.intro:
+        intro_ticks = 4 * TICKS_PER_BEAT
+        intro_notes = build_intro_notes(config.drums_config.velocity)
+        pad_notes = offset_notes(pad_notes, intro_ticks)
+        bass_notes = offset_notes(bass_notes, intro_ticks)
+        guitar_notes = offset_notes(guitar_notes, intro_ticks)
+        percussion_notes = offset_notes(percussion_notes, intro_ticks)
+        percussion_notes = intro_notes + percussion_notes
+        percussion_notes.sort(key=lambda n: n.start_tick)
+        intro_beats = intro_ticks / TICKS_PER_BEAT
+
     return SequenceData(
         total_beats=config.total_bars * BEATS_PER_BAR * config.repetitions,
         pattern_beats=config.pattern_beats,
@@ -390,4 +421,5 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         arp_notes=[],
         guitar_notes=guitar_notes,
         percussion_notes=percussion_notes,
+        intro_beats=intro_beats,
     )

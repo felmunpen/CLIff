@@ -138,6 +138,11 @@
 - `structure_ticks` = `total_bars * BEATS_PER_BAR * TICKS_PER_BEAT` (longitud de una estructura).
 - Si `repetitions <= 1`, devuelve la lista original sin cambios.
 
+#### G. Intro (count-in)
+- Con `intro = True`, se añaden **4 golpes de hi-hat en negras** (1 compás, nota 46) antes de la pieza.
+- Se desplazan **todas** las notas (pad, bajo, guitarra, percusión) `intro_ticks = 4 * TICKS_PER_BEAT`
+  a la derecha y se antepone el intro a la percusión. `velocity` = `drums_config.velocity`.
+
 ### 1.6 Orquestación
 **Función:** `generate_sequence(config: SongConfig) -> SequenceData`
 
@@ -151,7 +156,8 @@
    bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con
    `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`); si `fill`, añadir `build_fill_notes(...)` y reordenar.
 6. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
-   (`arp_notes = []`).
+   (`arp_notes = []`). Si `intro`, construir los 4 golpes de hi-hat, desplazar todas las
+   notas de la pieza `intro_ticks` (4 beats) a la derecha y rellenar `intro_beats`.
 
 **Resumen (beats):**
 - `total_beats = total_bars * 4.0 * repetitions`
@@ -159,3 +165,4 @@
 - `full_loops` (entero, por estructura)
 - `tail_beats = tail_ticks / TICKS_PER_BEAT`
 - `repetitions = config.repetitions`
+- `intro_beats = 4.0` si `intro`, si no `0.0`

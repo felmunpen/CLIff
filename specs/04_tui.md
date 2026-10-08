@@ -16,6 +16,7 @@
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
    - `tail_vary`: Confirm y/n "¿Variar la melodía del tail? (mismos tiempos, otros pitches)" (default No), mostrado justo después del diagrama de bloques.
    - `repetitions` ("Número de loops"): Entero (1–8, default 2). Nº de veces que se repite la estructura completa (ciclos completos + tail) para observar el truncamiento.
+   - `intro`: Confirm y/n "¿Intro de 4 golpes de hi-hat?" (default No) — count-in antes de la pieza.
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
    - `pad_mode`: Select (`Mono`, `Acorde`).
    - `pad_register`: Select (`Grave`, `Agudo`).
@@ -107,6 +108,7 @@ Ejemplo del resumen (8 compases, patrón de 7 beats):
 │ Double time                       │ No                          │
 │ Tail                              │ Truncado                    │
 │ Fill entre loops                  │ No                          │
+│ Intro                             │ No                          │
 └───────────────────────────────────┴─────────────────────────────┘
 ```
 
