@@ -223,6 +223,11 @@ def _collect_config(console: Console):
         )))
         _show_polymetry_preview(console, a["total_bars"], a["pattern_beats"])
 
+    def s_tail_vary():
+        a["tail_vary"] = _ask(questionary.confirm(
+            "¿Variar la melodía del tail? (mismos tiempos, otros pitches)", default=False,
+        ))
+
     def s_repetitions():
         a["repetitions"] = int(_ask(questionary.text(
             "Número de loops (1-8)", default="2", validate=_int_range(1, 8),
@@ -362,7 +367,7 @@ def _collect_config(console: Console):
                                                    validate=_int_range(1, 5),
                                                    key_bindings=_step_key_bindings(1, 5, 1, True))))
 
-    steps = [s_bpm, s_total_bars, s_pattern_beats, s_repetitions, s_pad_breath,
+    steps = [s_bpm, s_total_bars, s_pattern_beats, s_tail_vary, s_repetitions, s_pad_breath,
              s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
              s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_cymbal_vary,
              s_mixer, s_variations]
@@ -401,6 +406,7 @@ def _collect_config(console: Console):
         double_time=a["double_time"],
         cymbal=a["cymbal"],
         cymbal_vary=a["cymbal_vary"],
+        tail_vary=a["tail_vary"],
     )
     return config, a["variations"]
 
@@ -433,6 +439,7 @@ def _show_summary(console: Console, config: SongConfig, seq) -> None:
     )
     main.add_row("Plato", cymbal_label)
     main.add_row("Double time", "Sí" if config.double_time else "No")
+    main.add_row("Tail", "Variación melódica" if config.tail_vary else "Truncado")
 
     mixer = Table(box=box.SIMPLE, title="Mezclador", border_style="dim")
     mixer.add_column("Pista", style="bold")

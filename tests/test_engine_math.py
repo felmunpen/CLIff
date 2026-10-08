@@ -328,6 +328,56 @@ class TestTonicRecurrence(unittest.TestCase):
         self.assertGreaterEqual(high_tonics, libre_tonics)
 
 
+class TestTailVariation(unittest.TestCase):
+    def _tail_notes(self, seq, structure_ticks, full_loops, pattern_ticks):
+        tail_start = full_loops * pattern_ticks
+        return [n for n in seq.bass_notes
+                if tail_start <= n.start_tick < structure_ticks]
+
+    def test_same_rhythm_different_pitches(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1)
+        seq = engine_math.generate_sequence(config)  # tail_vary=False
+
+        random.seed(7)
+        config_vary = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1, tail_vary=True)
+        seq_vary = engine_math.generate_sequence(config_vary)
+
+        pattern_ticks = beats_to_ticks(7.0)
+        structure_ticks = config.total_bars * 4 * TICKS
+        full_loops = seq.full_loops
+
+        tail = self._tail_notes(seq, structure_ticks, full_loops, pattern_ticks)
+        tail_vary = self._tail_notes(seq_vary, structure_ticks, full_loops, pattern_ticks)
+
+        self.assertEqual(len(tail), len(tail_vary))
+        # mismo ritmo (duraciones idénticas)
+        self.assertEqual([n.duration_ticks for n in tail],
+                         [n.duration_ticks for n in tail_vary])
+        # misma primera nota (tónica)
+        self.assertEqual(tail[0].pitch, tail_vary[0].pitch)
+        # pitches distintos en algún punto del tail
+        self.assertNotEqual([n.pitch for n in tail], [n.pitch for n in tail_vary])
+
+    def test_tail_covers_tail_ticks(self):
+        random.seed(7)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1, tail_vary=True)
+        seq = engine_math.generate_sequence(config)
+        self.assertEqual(round(seq.tail_beats * TICKS),
+                         sum(n.duration_ticks for n in self._tail_notes(
+                             seq, config.total_bars * 4 * TICKS, seq.full_loops,
+                             beats_to_ticks(7.0))))
+
+    def test_tail_vary_first_note_is_tonic(self):
+        random.seed(3)
+        config = SongConfig(total_bars=8, pattern_beats=7.0, repetitions=1, tail_vary=True)
+        seq = engine_math.generate_sequence(config)
+        tonic_pitch = seq.bass_notes[0].pitch
+        tail = self._tail_notes(seq, config.total_bars * 4 * TICKS, seq.full_loops,
+                                beats_to_ticks(7.0))
+        self.assertEqual(tail[0].pitch, tonic_pitch)
+
+
 class TestCymbalVariation(unittest.TestCase):
     def _loop_pitches(self, seq, structure_ticks):
         cymbal_pitches = set(CYMBAL_PITCHES.values())

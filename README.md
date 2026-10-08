@@ -21,6 +21,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
     *   **Percusión:** Base rítmica en 4/4 con la caja en el beat 3 y plato en negras (por defecto), más un bombo que clona dinámicamente los acentos del bajo. Plato configurable (hi-hat abierto/cerrado, ride, crash o china), opción *double time* (caja en 2 y 4 y plato en corcheas) y variación aleatoria del plato por loop.
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Recurrencia de tónica:** Regula con qué probabilidad las notas del riff vuelven a la tónica (Libre/Baja/Media/Alta), superponiendo acentos de tónica sin alterar el contorno melódico.
+*   **Tail con variación melódica:** Opcionalmente, el tail conserva el ritmo truncado y la tónica inicial pero usa una melodía propia (pitches distintos), en lugar de repetir el inicio del riff.
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
 *   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
@@ -104,7 +105,7 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 4. Soporte para métricas compuestas y no cuaternarias (3/4, 6/8, 12/8).
 5. Compilación a ejecutable independiente sin dependencias externas (`.exe` / `.app`).
 6. Implementación del Arpegiador (hoy pista fantasma en el MVP).
-7. Tail generado como nuevo motivo (en lugar de truncado del patrón).
+7. ~~Tail con variación melódica~~ (mismo ritmo truncado, otros pitches).
 8. Selección de instrumento por pista.
 9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
 10. Fill rítmico al final de cada loop (transición entre repeticiones).

@@ -92,6 +92,8 @@
 - El riff se genera **una sola vez** con `event_count = len(pattern_rhythm_ticks)`.
 - Los ciclos completos **repiten el mismo riff** (índice 0 en cada reinicio, automático).
 - El tail usa `riff[:len(tail_rhythm_ticks)]` (truncado del propio patrón).
+- Con `tail_vary = True`, el tail usa un **riff propio** `generate_melody_indices(len(tail_rhythm_ticks), ...)`
+  en lugar del truncado: **mismo ritmo** (duraciones truncadas) y **primera nota = tónica**, pero **pitches distintos**.
 
 ### 1.5 Construcción de las Pistas
 
@@ -138,8 +140,8 @@
 0. Transponer la escala según la tónica: `scale_pitches = [p + TONIC_SEMITONES[tonic] for p in SCALE_PITCHES[scale]]`.
 1. Resolver densidad y generar el patrón rítmico.
 2. Calcular `full_loops` y `tail_ticks` con `polymetry_summary`; construir el tail.
-3. Generar el riff (con `tonic_prob = TONIC_RECURRENCE_PROB[config.tonic_recurrence]`) y
-   ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
+3. Generar el riff (con `tonic_prob = TONIC_RECURRENCE_PROB[config.tonic_recurrence]`), el
+   `tail_riff` si `tail_vary`, y ensamblar `bass_structure` (una única estructura: ciclos completos + tail).
 4. Repetir la estructura: `bass_notes = tile_notes(bass_structure, repetitions, total_ticks)`.
 5. Construir `pad_notes` (sobre `total_ticks * repetitions`), `guitar_notes` (transposición del
    bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con

@@ -153,8 +153,13 @@ def generate_melody_indices(event_count: int, max_jump: int, scale_len: int,
 
 
 def build_bass_notes(pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, pattern_ticks,
-                     scale_pitches, velocity) -> list[NoteEvent]:
-    """Ensambla la línea del bajo: ciclos completos (riff repetido) + tail (truncado)."""
+                     scale_pitches, velocity, tail_riff=None) -> list[NoteEvent]:
+    """Ensambla la línea del bajo: ciclos completos (riff repetido) + tail.
+
+    El tail usa por defecto el inicio del riff (truncado); si se pasa `tail_riff`,
+    usa esa melodía propia (mismo ritmo truncado, primera nota = tónica).
+    """
+    tail_melody = tail_riff if tail_riff is not None else riff
     notes: list[NoteEvent] = []
     # ciclos completos
     for loop in range(full_loops):
@@ -167,7 +172,7 @@ def build_bass_notes(pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, 
     if tail_rhythm_ticks:
         start = full_loops * pattern_ticks
         for i, dur in enumerate(tail_rhythm_ticks):
-            notes.append(NoteEvent(pitch=scale_pitches[riff[i]] + BASS_PITCH_OFFSET,
+            notes.append(NoteEvent(pitch=scale_pitches[tail_melody[i]] + BASS_PITCH_OFFSET,
                                    start_tick=start, duration_ticks=dur, velocity=velocity))
             start += dur
     return notes
@@ -308,10 +313,18 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         len(pattern_rhythm_ticks), config.max_jump, len(scale_pitches),
         TONIC_RECURRENCE_PROB[config.tonic_recurrence],
     )
+    tail_riff = (
+        generate_melody_indices(
+            len(tail_rhythm_ticks), config.max_jump, len(scale_pitches),
+            TONIC_RECURRENCE_PROB[config.tonic_recurrence],
+        )
+        if config.tail_vary and tail_rhythm_ticks
+        else None
+    )
 
     bass_structure = build_bass_notes(
         pattern_rhythm_ticks, tail_rhythm_ticks, riff, full_loops, pattern_ticks,
-        scale_pitches, config.bass_config.velocity,
+        scale_pitches, config.bass_config.velocity, tail_riff=tail_riff,
     )
     bass_notes = tile_notes(bass_structure, config.repetitions, total_ticks)
     pad_notes = build_pad_notes(

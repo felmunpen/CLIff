@@ -171,6 +171,7 @@ class SongConfig:
     double_time: bool = False           # platos a corcheas y caja en 2/4 (solo 4/4)
     cymbal: CymbalEnum = CymbalEnum.OPEN_HI_HAT
     cymbal_vary: bool = False           # variar el plato (aleatorio) en cada loop si repetitions > 1
+    tail_vary: bool = False             # tail con melodía nueva (mismo ritmo, tónica inicial)
 
 @dataclass
 class NoteEvent:

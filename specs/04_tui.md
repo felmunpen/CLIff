@@ -14,6 +14,7 @@
    - Se muestra la multiplicación `total_bars × BEATS_PER_BAR = beats por estructura`.
 3. **Paso 2: Polimetría y Pad**
    - `pattern_beats`: Flotante/Entero (ej. 3, 5, 7, 9.5). **Validado** como múltiplo de la menor duración permitida (0.25).
+   - `tail_vary`: Confirm y/n "¿Variar la melodía del tail? (mismos tiempos, otros pitches)" (default No), mostrado justo después del diagrama de bloques.
    - `repetitions` ("Número de loops"): Entero (1–8, default 2). Nº de veces que se repite la estructura completa (ciclos completos + tail) para observar el truncamiento.
    - `pad_breath_bars`: Entero (`0` = Drone Infinito, `1-8` = re-disparo).
    - `pad_mode`: Select (`Mono`, `Acorde`).
@@ -103,10 +104,12 @@ Ejemplo del resumen (8 compases, patrón de 7 beats):
 │ Duraciones permitidas             │ Negra, Corchea, Semicorchea │
 │ Plato                             │ Hi-hat abierto              │
 │ Double time                       │ No                          │
+│ Tail                              │ Truncado                    │
 └───────────────────────────────────┴─────────────────────────────┘
 ```
 
 > Si `cymbal_vary` está activo, la fila **Plato** muestra `Hi-hat abierto (varía por loop)`.
+> La fila **Tail** muestra `Variación melódica` cuando `tail_vary` está activo.
 
 - **💾 Exportar**: guarda los `.mid` con el nombre `{tónica}_{escala}_{compás}_{bpm}bpm_{fechaDDMMYYYY}_{nº}.mid` (p. ej. `c_eolian_44_146bpm_05102026_3.mid`). El `nº` es el siguiente libre en la carpeta de destino (evita sobreescritura); en lote se asignan números consecutivos.
 - Los tiempos y duraciones se muestran al usuario con **nombres de nota** (negra, corchea…), nunca en ticks enteros.

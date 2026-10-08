@@ -87,7 +87,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
 - Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).
 - Posible feature futura: **secuenciador de ritmo** en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*). Aplazado por salirse del alcance actual de la aplicación.
-- A estudiar (próxima visita): **Tail con notas diferentes** — que el tail no sea un mero truncamiento del patrón, sino un motivo nuevo.
+- ~~Tail con notas diferentes~~ — **completado**: flag `tail_vary` (y/n tras el diagrama de bloques); el tail mantiene el ritmo truncado y la tónica inicial, pero con melodía (pitches) propia.
 - A estudiar (próxima visita): **Fill al final del loop** — relleno/transición rítmica al cierre de cada loop.
 - A estudiar (próxima visita): **Intros** — cuatro golpes de hi-hat, drone suave, o usar el propio tail como introducción.
 
