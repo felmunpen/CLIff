@@ -319,6 +319,14 @@ def _collect_config(console: Console):
             ))
         a["cymbal_vary"] = vary
 
+    def s_fill():
+        fill = False
+        if a["repetitions"] > 1:
+            fill = _ask(questionary.confirm(
+                "¿Fill entre loops? (roll de caja + plato_alt)", default=False,
+            ))
+        a["fill"] = fill
+
     mixer_keys = (("Pad", "pad_config"), ("Bajo", "bass_config"),
                   ("Guitarra", "guitar_config"), ("Arpegiador", "arp_config"),
                   ("Percusión", "drums_config"))
@@ -370,7 +378,7 @@ def _collect_config(console: Console):
     steps = [s_bpm, s_total_bars, s_pattern_beats, s_tail_vary, s_repetitions, s_pad_breath,
              s_pad_mode, s_pad_register, s_tonic, s_scale, s_durations, s_max_jump,
              s_density, s_tonic_recurrence, s_double_time, s_cymbal, s_cymbal_vary,
-             s_mixer, s_variations]
+             s_fill, s_mixer, s_variations]
 
     if _run_steps(steps):
         return None
@@ -407,6 +415,7 @@ def _collect_config(console: Console):
         cymbal=a["cymbal"],
         cymbal_vary=a["cymbal_vary"],
         tail_vary=a["tail_vary"],
+        fill=a["fill"],
     )
     return config, a["variations"]
 
@@ -440,6 +449,7 @@ def _show_summary(console: Console, config: SongConfig, seq) -> None:
     main.add_row("Plato", cymbal_label)
     main.add_row("Double time", "Sí" if config.double_time else "No")
     main.add_row("Tail", "Variación melódica" if config.tail_vary else "Truncado")
+    main.add_row("Fill entre loops", "Sí" if config.fill else "No")
 
     mixer = Table(box=box.SIMPLE, title="Mezclador", border_style="dim")
     mixer.add_column("Pista", style="bold")

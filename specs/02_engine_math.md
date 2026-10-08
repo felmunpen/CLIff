@@ -117,6 +117,10 @@
 - **Snare (38):** beat 3 de cada compás por defecto (`bar_start + 960` ticks); en *double time*, beats 2 y 4 (`bar_start + 480` y `bar_start + 1440`).
 - **Plato:** negras por defecto (cada 480 ticks); en *double time*, corcheas (cada 240 ticks). Nota según `CYMBAL_PITCHES[cymbal]`.
   - Si `cymbal_vary` y `repetitions > 1`, el plato se emite **por loop**: el primer loop usa el plato elegido y cada loop siguiente elige un plato **aleatorio distinto del anterior** (`cymbal_pitches_per_loop`).
+- **Fill entre loops** (`fill = True` y `repetitions > 1`): en cada frontera entre loops se añade un
+  roll de caja (4 semicorcheas en el último beat del loop que termina) y un `plato_alt` en el
+  downbeat del loop siguiente. `plato_alt`: si `cymbal_vary`, es el plato del loop saliente (eco);
+  si no, un plato aleatorio distinto del principal (elección fija por generación).
 - Duración fija de los golpes (p.ej. 120 ticks).
 - `velocity` = `drums_config.velocity`.
 
@@ -145,7 +149,7 @@
 4. Repetir la estructura: `bass_notes = tile_notes(bass_structure, repetitions, total_ticks)`.
 5. Construir `pad_notes` (sobre `total_ticks * repetitions`), `guitar_notes` (transposición del
    bajo repetido) y `percussion_notes` (sobre `total_bars * repetitions` compases, con
-   `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`).
+   `cymbal_pitch = CYMBAL_PITCHES[config.cymbal]`); si `fill`, añadir `build_fill_notes(...)` y reordenar.
 6. Devolver `SequenceData` con el resumen (en beats) y las cinco listas de notas
    (`arp_notes = []`).
 

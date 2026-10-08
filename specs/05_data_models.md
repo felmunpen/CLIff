@@ -172,6 +172,7 @@ class SongConfig:
     cymbal: CymbalEnum = CymbalEnum.OPEN_HI_HAT
     cymbal_vary: bool = False           # variar el plato (aleatorio) en cada loop si repetitions > 1
     tail_vary: bool = False             # tail con melodía nueva (mismo ritmo, tónica inicial)
+    fill: bool = False                  # fill (roll de caja + plato_alt) entre loops
 
 @dataclass
 class NoteEvent:

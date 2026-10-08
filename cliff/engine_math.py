@@ -259,6 +259,34 @@ def build_percussion_notes(bass_notes, total_bars, velocity, double_time=False,
     return notes
 
 
+def build_fill_notes(total_bars, repetitions, loop_cymbals, cymbal_vary, velocity) -> list[NoteEvent]:
+    """Fill de transición entre loops: roll de caja (4 semicorcheas) en el último
+    beat de cada loop + plato_alt en el downbeat del siguiente loop.
+
+    `plato_alt`: si `cymbal_vary`, es el plato del loop que termina (eco); si no,
+    un plato aleatorio distinto del principal (elección fija por generación).
+    """
+    if repetitions < 2:
+        return []
+    bar_ticks = BEATS_PER_BAR * TICKS_PER_BEAT
+    structure_ticks = total_bars * bar_ticks
+    sixteenth = TICKS_PER_BEAT // 4  # 120 ticks
+    hit = 120
+    alt_pitches = loop_cymbals if cymbal_vary else [
+        random.choice([p for p in CYMBAL_PITCHES.values() if p != loop_cymbals[0]])
+    ] * repetitions
+    notes: list[NoteEvent] = []
+    for b in range(repetitions - 1):
+        boundary = (b + 1) * structure_ticks
+        roll_start = boundary - TICKS_PER_BEAT
+        for k in range(4):
+            notes.append(NoteEvent(pitch=38, start_tick=roll_start + k * sixteenth,
+                                   duration_ticks=hit, velocity=velocity))
+        notes.append(NoteEvent(pitch=alt_pitches[b], start_tick=boundary,
+                               duration_ticks=hit, velocity=velocity))
+    return notes
+
+
 def build_guitar_notes(bass_notes, velocity) -> list[NoteEvent]:
     """Duplica la línea del bajo una octava por encima (C2) para la guitarra."""
     return [
@@ -332,17 +360,24 @@ def generate_sequence(config: SongConfig) -> SequenceData:
         config.pad_breath_bars, config.pad_config.velocity,
     )
     guitar_notes = build_guitar_notes(bass_notes, config.guitar_config.velocity)
-    cymbal_pitches = (
+    loop_cymbals = (
         cymbal_pitches_per_loop(config.cymbal, config.repetitions)
         if config.cymbal_vary and config.repetitions > 1
-        else None
+        else [CYMBAL_PITCHES[config.cymbal]] * config.repetitions
     )
+    cymbal_pitches = loop_cymbals if config.cymbal_vary and config.repetitions > 1 else None
     percussion_notes = build_percussion_notes(
         bass_notes, config.total_bars * config.repetitions, config.drums_config.velocity,
         config.double_time, CYMBAL_PITCHES[config.cymbal],
         cymbal_pitches=cymbal_pitches,
         structure_bars=config.total_bars if cymbal_pitches else None,
     )
+    if config.fill:
+        percussion_notes += build_fill_notes(
+            config.total_bars, config.repetitions, loop_cymbals,
+            config.cymbal_vary, config.drums_config.velocity,
+        )
+        percussion_notes.sort(key=lambda n: n.start_tick)
 
     return SequenceData(
         total_beats=config.total_bars * BEATS_PER_BAR * config.repetitions,

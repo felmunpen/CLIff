@@ -22,6 +22,7 @@ La herramienta permite crear secuencias MIDI multipista basadas en **desfases m�
 *   **Densidad:** Controla el número de notas del patrón principal (Baja/Media/Alta).
 *   **Recurrencia de tónica:** Regula con qué probabilidad las notas del riff vuelven a la tónica (Libre/Baja/Media/Alta), superponiendo acentos de tónica sin alterar el contorno melódico.
 *   **Tail con variación melódica:** Opcionalmente, el tail conserva el ritmo truncado y la tónica inicial pero usa una melodía propia (pitches distintos), en lugar de repetir el inicio del riff.
+*   **Fill entre loops:** Opcionalmente, un roll de caja (semicorcheas) en el último beat de cada loop y un `plato_alt` en el downbeat del siguiente como transición (con variación de plato, eco del plato saliente).
 *   **Selección de Tonalidad y Escala:** Elige la nota central (tónica, 12 notas solo sostenidos) y el modo (Mayor, Menor (Eólica), Menor Armónica, Frigio o Frigio Dominante).
 *   **Exportación Multipista:** Genera archivos `.mid` de 5 pistas listos para importar en Ableton Live, FL Studio, Logic, Reaper o Bitwig.
 *   **Generación por Lotes:** Produce de 1 a 5 variaciones de los mismos parámetros en una sola pasada.
@@ -108,5 +109,5 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 7. ~~Tail con variación melódica~~ (mismo ritmo truncado, otros pitches).
 8. Selección de instrumento por pista.
 9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
-10. Fill rítmico al final de cada loop (transición entre repeticiones).
+10. ~~Fill rítmico entre loops~~ (roll de caja + plato_alt).
 11. Intros configurables (cuatro golpes de hi-hat, drone suave o el propio tail).

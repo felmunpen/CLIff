@@ -28,6 +28,7 @@
    - `tonic_recurrence`: Select (`Libre`, `Baja`, `Media`, `Alta`) — recurrencia de la tónica en el riff.
    - `cymbal`: Select (`Hi-hat abierto`, `Hi-hat cerrado`, `Ride`, `Crash`, `China`).
    - `cymbal_vary`: Confirm y/n "¿Variar el plato en cada loop? (aleatorio)" (default No), solo si `repetitions > 1`.
+   - `fill`: Confirm y/n "¿Fill entre loops? (roll de caja + plato_alt)" (default No), solo si `repetitions > 1`.
    - `double_time`: Confirm y/n (solo 4/4) — plato a corcheas y caja en 2 y 4.
 5. **Paso 4: Mezclador**
    - Confirm `y/n`: "¿Personalizar volumen y velocity de las pistas?" (default No).
@@ -105,6 +106,7 @@ Ejemplo del resumen (8 compases, patrón de 7 beats):
 │ Plato                             │ Hi-hat abierto              │
 │ Double time                       │ No                          │
 │ Tail                              │ Truncado                    │
+│ Fill entre loops                  │ No                          │
 └───────────────────────────────────┴─────────────────────────────┘
 ```
 

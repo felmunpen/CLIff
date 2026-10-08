@@ -378,6 +378,53 @@ class TestTailVariation(unittest.TestCase):
         self.assertEqual(tail[0].pitch, tonic_pitch)
 
 
+class TestFill(unittest.TestCase):
+    def test_no_fill_by_default(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=2)
+        seq = engine_math.generate_sequence(config)
+        boundary = config.total_bars * 4 * TICKS
+        alt = [n for n in seq.percussion_notes
+               if n.start_tick == boundary and n.pitch in CYMBAL_PITCHES.values()]
+        self.assertEqual(len(alt), 1)  # solo el plato principal
+
+    def test_fill_requires_repetitions(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=1, fill=True)
+        seq = engine_math.generate_sequence(config)
+        snare = [n for n in seq.percussion_notes if n.pitch == 38]
+        self.assertEqual(len(snare), 4)  # sin roll extra
+
+    def test_fill_snare_roll_and_plato_alt(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=2, fill=True)
+        seq = engine_math.generate_sequence(config)
+        boundary = config.total_bars * 4 * TICKS
+        roll = [n for n in seq.percussion_notes
+                if n.pitch == 38 and boundary - TICKS <= n.start_tick < boundary]
+        self.assertEqual(len(roll), 4)
+        alt = [n for n in seq.percussion_notes
+               if n.start_tick == boundary and n.pitch in CYMBAL_PITCHES.values()
+               and n.pitch != CYMBAL_PITCHES[config.cymbal]]
+        self.assertEqual(len(alt), 1)
+
+    def test_fill_plato_alt_echoes_leaving_cymbal(self):
+        random.seed(7)
+        config = SongConfig(total_bars=4, repetitions=3, fill=True, cymbal_vary=True)
+        seq = engine_math.generate_sequence(config)
+        structure_ticks = config.total_bars * 4 * TICKS
+        for b in range(2):
+            boundary = (b + 1) * structure_ticks
+            leaving_main = [n.pitch for n in seq.percussion_notes
+                            if n.start_tick == b * structure_ticks
+                            and n.pitch in CYMBAL_PITCHES.values()][0]
+            at_boundary = [n for n in seq.percussion_notes
+                           if n.start_tick == boundary
+                           and n.pitch in CYMBAL_PITCHES.values()]
+            self.assertEqual(len(at_boundary), 2)  # plato entrante + plato_alt
+            self.assertEqual(sum(1 for n in at_boundary if n.pitch == leaving_main), 1)
+
+
 class TestCymbalVariation(unittest.TestCase):
     def _loop_pitches(self, seq, structure_ticks):
         cymbal_pitches = set(CYMBAL_PITCHES.values())
