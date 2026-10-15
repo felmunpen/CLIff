@@ -61,7 +61,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
-3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
+3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-7), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
 6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).
