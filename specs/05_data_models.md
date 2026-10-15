@@ -212,7 +212,7 @@ class SequenceData:
 | `repetitions` | Entero, 1–8 (`1` = estructura única) |
 | `pattern_beats` | Múltiplo de la menor duración permitida (0.25 = 120 ticks) |
 | `pad_breath_bars` | Entero, 0–8 (`0` = Drone Infinito) |
-| `max_jump` | Entero, 1–5 |
+| `max_jump` | Entero, 1–7 |
 | `velocity` | Entero, 0–127 |
 | `volume` | Entero, 0–100 |
 
