@@ -112,3 +112,4 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
 10. ~~Fill rítmico entre loops~~ (roll de caja + plato_alt).
 11. ~~Intros configurables~~ (count-in de 4 golpes de hi-hat).
+12. *Live form* en la TUI: re-render de las respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza ocurre solo al cambiar de sección).

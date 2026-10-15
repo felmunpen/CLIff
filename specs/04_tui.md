@@ -23,7 +23,9 @@
 
 1. **Header:** Logo **CLIff** en texto plano (subtítulo, motivo y tagline), sin `Panel`,
    alineado a la izquierda y en verde (`cliff.brand`). Es la **pantalla de inicio**: espera
-   `Enter` para continuar (`Ctrl+C` o `Ctrl+G` salen). Cada sección se titula con un texto en
+   `Enter` para continuar (`Ctrl+C` o `Ctrl+G` salen). A partir de ahí, cada sección se
+   muestra tras un **clear** con un **header compacto** (`CLIff` + ayuda) persistente arriba.
+   Cada sección se titula con un texto en
    **bold** ("Configuración Global", "Estructura", "Reglas Algorítmicas", "Mezclador",
    "Lote") con su índice de paginación (`[N/5]`, p. ej. `Reglas Algorítmicas [3/5]`),
    seguido de un **subrayado** de la misma longitud (`─` en `dim`).
@@ -76,8 +78,11 @@
    - **Ctrl+C** retrocede a la pregunta anterior. En la **primera pregunta de una sección**,
      retrocede a la **última pregunta de la sección anterior** (en la primera sección, sale).
    - **Ctrl+G** sale del programa en cualquier momento (en cualquier pregunta).
-   - Entre secciones se **limpia la terminal** (`console.clear()`) y se re-muestra el título.
-   - El header muestra esta ayuda como texto `dim`.
+   - Cada sección se muestra tras un **clear** de la terminal, dejando arriba un **header
+     compacto** (`CLIff` + ayuda en `dim`) y el título con su índice `[N/5]`; las preguntas
+     de la sección empiezan desde el tope. Al retroceder a otra sección, la pantalla se
+     limpia y se vuelve a renderizar el header + título de esa sección.
+   - El header compacto muestra la ayuda (`Ctrl+C` / `Ctrl+G`) como texto `dim`.
 
 ### 1.2 Previsualización de Polimetría (`rich`)
 
@@ -108,12 +113,12 @@ Ejemplo (8 compases en 4/4, patrón de 7 beats):
 
 ### 1.3 Vista de Resultados (`rich.table`)
 
-Tras generar, se muestra:
+Tras generar, se limpia la terminal y se muestra:
 
-1. **Resumen** (`box.SIMPLE`, con título y caption, precedido de limpieza de terminal y una
-   línea en blanco): métricas de polimetría (beats por estructura, loops, duración del patrón,
-   ciclos, tail) más los parámetros de la pieza (BPM, tónica, escala, densidad de notas,
-   recurrencia de tónica, salto melódico, duraciones permitidas, plato y double time).
+1. **Resumen** (`box.SIMPLE`, con título y caption, precedido de una línea en blanco):
+   métricas de polimetría (beats por estructura, loops, duración del patrón, ciclos, tail)
+   más los parámetros de la pieza (BPM, tónica, escala, densidad de notas, recurrencia de
+   tónica, salto melódico, duraciones permitidas, plato y double time).
    La columna **Valor** se muestra en `cliff.value` (verde suave).
 2. **Mezclador** (`box.SIMPLE`): por pista (Pad, Bajo, Guitarra, Arpegiador, Percusión)
    el instrumento GM, velocity y volumen (valores en `cliff.value`).

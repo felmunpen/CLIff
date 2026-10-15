@@ -8,7 +8,6 @@ import questionary
 from questionary import Style
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.keys import Keys
-from prompt_toolkit.shortcuts import clear as clear_screen
 from rich import box
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
@@ -226,7 +225,7 @@ def _run_steps(steps):
 
 
 def _run_sections(console: Console, sections):
-    """Ejecuta secciones (título + pasos) con navegación atrás y limpieza entre secciones."""
+    """Ejecuta secciones (título + pasos) con navegación atrás, limpiando por sección."""
     flat = []
     sec_of = []
     for si, (_, steps) in enumerate(sections):
@@ -239,14 +238,14 @@ def _run_sections(console: Console, sections):
     while 0 <= i < len(flat):
         sec = sec_of[i]
         if sec != last_sec:
+            _clear_screen(console)
+            _show_header_compact(console)
             _section(console, sections[sec][0], sec + 1, len(sections))
             last_sec = sec
         try:
             flat[i]()
         except _Back:
             i -= 1
-            if i >= 0 and sec_of[i] != sec:
-                last_sec = -1
             continue
         i += 1
     return i < 0
@@ -262,8 +261,21 @@ def _show_header(console: Console) -> None:
     console.print()
 
 
+def _show_header_compact(console: Console) -> None:
+    """Encabezado reducido que persiste arriba en cada pantalla de sección."""
+    console.print(Text("CLIff", style="cliff.brand"))
+    console.print(Text("algorithmic riffs · in your terminal", style="dim"))
+    console.print(Text("Ctrl+C = retroceder · Ctrl+G = salir", style="dim"))
+    console.print()
+
+
+def _clear_screen(console: Console) -> None:
+    """Limpia la terminal (solo si es TTY) para empezar una pantalla desde arriba."""
+    if console.is_terminal:
+        console.clear()
+
+
 def _section(console: Console, title: str, index: int, total: int) -> None:
-    clear_screen()
     heading = f"{title} [{index}/{total}]"
     console.print(Text(heading, style="cliff.brand"))
     console.print(Text("─" * len(heading), style="dim"))
@@ -562,7 +574,7 @@ def _collect_config(console: Console):
 
 
 def _show_summary(console: Console, config: SongConfig, seq) -> None:
-    clear_screen()
+    console.print()
     structure_beats = int(seq.total_beats // seq.repetitions)
     durations = ", ".join(name for name, beats in DURATION_OPTIONS
                           if beats in config.allowed_durations)
@@ -661,6 +673,7 @@ def _export(console: Console, config: SongConfig, midis) -> None:
 
 def _result_screen(console: Console, config: SongConfig, seq, midis) -> str:
     """Muestra el resumen y las acciones. Devuelve 'back' o 'quit'."""
+    _clear_screen(console)
     _show_summary(console, config, seq)
     if len(midis) > 1:
         console.print(f"[dim]Se generaron {len(midis)} variaciones.[/dim]")

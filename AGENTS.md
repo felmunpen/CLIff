@@ -90,6 +90,8 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - ~~Tail con notas diferentes~~ — **completado**: flag `tail_vary` (y/n tras el diagrama de bloques); el tail mantiene el ritmo truncado y la tónica inicial, pero con melodía (pitches) propia.
 - ~~Fill al final del loop~~ — **completado**: flag `fill` (y/n, solo si loops > 1); roll de caja (4 semicorcheas) en el último beat de cada loop + `plato_alt` en el downbeat del siguiente (con `cymbal_vary`, eco del plato saliente; si no, plato aleatorio distinto del principal).
 - ~~Intros~~ — **completado**: flag `intro` (y/n); count-in de 4 golpes de hi-hat en negras (1 compás) que desplaza la pieza. Aplazados para el futuro: drone suave y tail como intro.
+- ~~Navegación por secciones con clear + header compacto~~ — **completado**: cada sección (y la pantalla de resultados) se muestra tras un `clear` de la terminal, con header compacto arriba y las preguntas empezando desde el tope (`_clear_screen` + `_show_header_compact` en `_run_sections`).
+- Posible feature futura: **live form** en la TUI — re-render del header + título + respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza solo ocurre al cambiar de sección).
 ---
 
 ## Control de versiones
