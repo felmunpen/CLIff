@@ -61,7 +61,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 ## 4. Flujo de la Interfaz TUI (Prompt Flow)
 1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
 2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
-3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-5), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
+3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-7), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
 4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
 5. **Lote:** Nº de variaciones a generar (1-5).
 6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).
@@ -90,6 +90,8 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - ~~Tail con notas diferentes~~ — **completado**: flag `tail_vary` (y/n tras el diagrama de bloques); el tail mantiene el ritmo truncado y la tónica inicial, pero con melodía (pitches) propia.
 - ~~Fill al final del loop~~ — **completado**: flag `fill` (y/n, solo si loops > 1); roll de caja (4 semicorcheas) en el último beat de cada loop + `plato_alt` en el downbeat del siguiente (con `cymbal_vary`, eco del plato saliente; si no, plato aleatorio distinto del principal).
 - ~~Intros~~ — **completado**: flag `intro` (y/n); count-in de 4 golpes de hi-hat en negras (1 compás) que desplaza la pieza. Aplazados para el futuro: drone suave y tail como intro.
+- ~~Navegación por secciones con clear + header compacto~~ — **completado**: cada sección (y la pantalla de resultados) se muestra tras un `clear` de la terminal, con header compacto arriba y las preguntas empezando desde el tope (`_clear_screen` + `_show_header_compact` en `_run_sections`).
+- Posible feature futura: **live form** en la TUI — re-render del header + título + respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza solo ocurre al cambiar de sección).
 ---
 
 ## Control de versiones
