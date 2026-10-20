@@ -91,6 +91,7 @@ CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se 
 - ~~Intros~~ — **completado**: flag `intro` (y/n); count-in de 4 golpes de hi-hat en negras (1 compás) que desplaza la pieza. Aplazados para el futuro: drone suave y tail como intro.
 - ~~Navegación por secciones con clear + header compacto~~ — **completado**: cada sección (y la pantalla de resultados) se muestra tras un `clear` de la terminal, con header compacto arriba y las preguntas empezando desde el tope (`_clear_screen` + `_show_header_compact` en `_run_sections`).
 - Posible feature futura: **live form** en la TUI — re-render del header + título + respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza solo ocurre al cambiar de sección).
+- Añadir al `README.md` una pequeña sección de *tips & tricks* para futuros usuarios.
 ---
 
 ## Control de versiones
