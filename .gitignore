@@ -4,13 +4,10 @@ __pycache__/
 venv/
 .venv/
 
-# Archivos generados en tiempo de ejecución
-output/
-*.mid
+# Archivos generados en tiempo de ejecución (salvo los ejemplos versionados)
+output/*
+!output/cool_examples/
+!output/cool_examples/**
 
 # Configuración de agentes
 .agents/
-
-# Otras utilidades
-extras/
-cool/
