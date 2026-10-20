@@ -8,14 +8,6 @@ venv/
 output/
 *.mid
 
-# Empaquetado a ejecutable (PyInstaller): tooling y artefactos locales.
-# No se versionan porque el empaquetado a .exe es un proceso de máquina local
-# y estos archivos se regeneran/usan solo al construir.
-build/
-dist/
-*.spec
-requirements-dev.txt
-
 # Configuración de agentes
 .agents/
 
