@@ -105,11 +105,10 @@ El número final se incrementa automáticamente para no sobrescribir archivos an
 2. Algoritmos de variación dinámica de *velocity* y silencios rítmicos.
 3. Grados negativos por debajo de la tónica principal en el bajo.
 4. Soporte para métricas compuestas y no cuaternarias (3/4, 6/8, 12/8).
-5. Compilación a ejecutable independiente sin dependencias externas (`.exe` / `.app`).
-6. Implementación del Arpegiador (hoy pista fantasma en el MVP).
-7. ~~Tail con variación melódica~~ (mismo ritmo truncado, otros pitches).
-8. Selección de instrumento por pista.
-9. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
-10. ~~Fill rítmico entre loops~~ (roll de caja + plato_alt).
-11. ~~Intros configurables~~ (count-in de 4 golpes de hi-hat).
-12. *Live form* en la TUI: re-render de las respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza ocurre solo al cambiar de sección).
+5. Implementación del Arpegiador (hoy pista fantasma en el MVP).
+6. ~~Tail con variación melódica~~ (mismo ritmo truncado, otros pitches).
+7. Selección de instrumento por pista.
+8. Secuenciador de ritmo en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*).
+9. ~~Fill rítmico entre loops~~ (roll de caja + plato_alt).
+10. ~~Intros configurables~~ (count-in de 4 golpes de hi-hat).
+11. *Live form* en la TUI: re-render de las respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza ocurre solo al cambiar de sección).

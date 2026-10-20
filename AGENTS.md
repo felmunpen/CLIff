@@ -11,7 +11,6 @@ El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacke
 - **Lenguaje:** Python 3.10+
 - **Interfaz de Usuario (TUI):** `rich` (para salidas visuales, paneles, tablas y colores) y `questionary` (para menús e inputs interactivos).
 - **Generación MIDI:** `mido` (y sus constructores `MetaMessage`, `Message`, `MidiFile`, `MidiTrack`).
-- **Empaquetado (Final):** `PyInstaller` (configurado para generar un ejecutable independiente).
 - **PROHIBIDO:** Tecnologías web (JS, HTML, WebAudio), frameworks GUI de escritorio (Tkinter, PyQt, Electron). Todo el software debe ejecutarse estrictamente en la terminal.
 
 ## 3. Arquitectura Musical del MVP

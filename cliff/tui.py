@@ -1,7 +1,6 @@
 """Interfaz TUI: formularios `questionary` y vistas `rich`."""
 
 import os
-import sys
 from datetime import date
 from pathlib import Path
 
@@ -34,10 +33,7 @@ from .models import (
     TrackConfig,
 )
 
-if getattr(sys, "frozen", False):
-    PROJECT_ROOT = Path(sys.executable).resolve().parent
-else:
-    PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = PROJECT_ROOT / "output"
 
 TONIC_VALUES = [t.value for t in TonicEnum]
