@@ -1,0 +1,21 @@
+# Suggestions
+
+- ~~Hacer que la pieza dure N veces (2 por defecto)~~ — **completado**.
+- ~~Sesgo de la nota final del patrón (`generate_rhythm_pattern`)~~ — **completado**: relleno por *backtracking* aleatorizado que mantiene todas las notas (incluida la última) dentro del pool, con fallback a "última nota = resto" solo cuando el patrón no es combinable.
+- ~~Duración por defecto a 4 compases~~ — **completado**.
+- ~~Leyenda de acciones del resultado~~ — **completado**: eliminada, queda el `select` de acciones (💾 Exportar / ↩ Volver / ✕ Salir).
+- ~~Incrementar/decrementar campos numéricos con flechas~~ — **completado**: enteros ±1; `pattern_beats` ±0.25.
+- ~~Navegación atrás entre preguntas~~ — **completado**: Ctrl+C retrocede una pregunta; en el primer prompt sale del programa.
+- ~~Variación del plato por loop~~ — **completado**: confirm "¿Variar el plato en cada loop? (aleatorio)" (solo si loops > 1); el primer loop usa el plato elegido y los siguientes eligen otro distinto al azar.
+- ~~Densidad relativa al rango factible (`resolve_density` / `DENSITY_FRACTIONS`)~~ — **completado**: la densidad se interpreta como fracción del rango `[min_notes, max_notes]` (Baja 0.25, Media 0.5, Alta 0.8), eliminando el colapso a "todo negras" cuando la negra está en el pool.
+- ~~Guarda de combinabilidad~~ — **completado**: `pattern_is_combinable` (gcd) avisa/bloquea en la TUI cuando `pattern_beats × 4` es impar (XX.25/XX.75) sin corchea con puntillo ni semicorchea en el pool.
+- Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
+- Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
+- Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).
+- Posible feature futura: **secuenciador de ritmo** en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*). Aplazado por salirse del alcance actual de la aplicación.
+- ~~Tail con notas diferentes~~ — **completado**: flag `tail_vary` (y/n tras el diagrama de bloques); el tail mantiene el ritmo truncado y la tónica inicial, pero con melodía (pitches) propia.
+- ~~Fill al final del loop~~ — **completado**: flag `fill` (y/n, solo si loops > 1); roll de caja (4 semicorcheas) en el último beat de cada loop + `plato_alt` en el downbeat del siguiente (con `cymbal_vary`, eco del plato saliente; si no, plato aleatorio distinto del principal).
+- ~~Intros~~ — **completado**: flag `intro` (y/n); count-in de 4 golpes de hi-hat en negras (1 compás) que desplaza la pieza. Aplazados para el futuro: drone suave y tail como intro.
+- ~~Navegación por secciones con clear + header compacto~~ — **completado**: cada sección (y la pantalla de resultados) se muestra tras un `clear` de la terminal, con header compacto arriba y las preguntas empezando desde el tope (`_clear_screen` + `_show_header_compact` en `_run_sections`).
+- Posible feature futura: **live form** en la TUI — re-render del header + título + respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza solo ocurre al cambiar de sección).
+- Añadir al `README.md` una pequeña sección de *tips & tricks* para futuros usuarios.
