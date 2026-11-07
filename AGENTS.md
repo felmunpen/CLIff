@@ -1,106 +1,165 @@
-# AI Developer Context & Spec Sheet — CLIff
+# AGENTS.md - Directrices y reglas de operación
 
-## 1. Contexto del Proyecto
-**CLIff** (*Command Line Interface + Riff*) es un generador algorítmico de música MIDI por consola (CLI/TUI). Se basa en la creación de **polimetrías** (patrones de longitud asimétrica repitiéndose sobre una base estándar de 4/4) utilizando reglas matemáticas y el cálculo de residuos (*tails*).
+Este documento define el comportamiento, las restricciones y el flujo de trabajo del agente de desarrollo de CLIff.
 
-**Descripción corta:** *A CLI-based algorithmic MIDI generator for polymetric riffs and mathematical pattern composition.*
+## 1. Rol y filosofía principal
 
-El objetivo de CLIff es ofrecer una herramienta ligera, enfocada y estilo "hacker/productor" donde el usuario introduzca parámetros numéricos en la terminal y obtenga archivos `.mid` multipista listos para arrastrar a un DAW.
+- Actúa como un desarrollador senior, pragmático, analítico y orientado a resultados.
+- Prioriza la simplicidad, la claridad y los cambios mínimos necesarios.
+- No introduzcas sobreingeniería ni funcionalidades no solicitadas.
+- Cualquier desviación arquitectónica debe justificarse y consultarse previamente.
+- La conversación y las explicaciones serán en español.
+- El código nuevo, los nombres de variables, los comentarios, los docstrings y los mensajes de commit serán en inglés.
+- Respeta siempre el alcance solicitado y las restricciones técnicas de CLIff.
 
-## 2. Stack Tecnológico Estricto
-- **Lenguaje:** Python 3.10+
-- **Interfaz de Usuario (TUI):** `rich` (para salidas visuales, paneles, tablas y colores) y `questionary` (para menús e inputs interactivos).
-- **Generación MIDI:** `mido` (y sus constructores `MetaMessage`, `Message`, `MidiFile`, `MidiTrack`).
-- **PROHIBIDO:** Tecnologías web (JS, HTML, WebAudio), frameworks GUI de escritorio (Tkinter, PyQt, Electron). Todo el software debe ejecutarse estrictamente en la terminal.
+## 2. Briefing del proyecto
 
-## 3. Arquitectura Musical del MVP
+- **Descripción:** CLIff es un generador algorítmico de música MIDI para terminal. Crea riffs polimétricos mediante patrones rítmicos asimétricos, escalas configurables y cálculo de residuos (*tails*), exportando archivos MIDI multipista.
+- **Objetivo principal:** ofrecer una herramienta ligera y directa para experimentar con polimetrías y generar rápidamente riffs MIDI utilizables en un DAW.
+- **Público objetivo:** productores, compositores y usuarios interesados en math rock, metal progresivo, música electrónica experimental y composición algorítmica desde la terminal.
 
-### 3.1 Pistas y Asignaciones (Estándar General MIDI)
-CLIff genera siempre 5 pistas (canales en notación GM 1-indexada; en `mido` se resta 1):
-1. **Pad (Canal 1):** Instrumento GM 89 (Pad 2 - Warm). Mantiene el sostén armónico.
-2. **Bajo (Canal 2):** Instrumento GM 33 (Finger Bass). Ejecuta la línea melódica algorítmica principal, **dos octavas por debajo** de la escala base (tónica en octava grave, p. ej. C1).
-3. **Arpegiador (Canal 3):** Instrumento GM 80 (Square Lead). **Pista fantasma en el MVP** (presente pero sin notas, reservada para una feature futura).
-4. **Guitarra (Canal 4):** Instrumento GM 29 (Overdriven Guitar). Duplica la línea del bajo **una octava por encima** (octava grave, p. ej. C2).
-5. **Percusión (Canal 10):** Set estándar GM de percusión.
+## 3. Stack tecnológico
 
-### 3.2 El Motor de Polimetría (Lógica del Residuo)
-- **Métrica base:** 4/4 (Fijo en MVP).
-- **Duración Total:** $X$ compases definidos por el usuario (ej. 8 compases = 32 beats).
-- **Patrón Principal:** $Y$ beats definidos por el usuario (ej. 7 beats).
-- **Comportamiento:** El patrón de $Y$ beats se repite consecutivamente hasta donde quepa completo dentro de los $X$ compases.
-- **Tail / Residuo:** Los beats sobrantes (`total_beats % pattern_beats`) se rellenan con una versión **truncada del propio Patrón Principal** (ej. los primeros 4 beats del patrón de 7).
+El proyecto utiliza el siguiente stack:
 
-### 3.3 El Motor Rítmico (Duraciones y Densidad)
-- El usuario selecciona qué duraciones están permitidas mediante checkboxes: Negra (1.0), Corchea con puntillo (0.75), Corchea (0.5), Semicorchea (0.25).
-- **Densidad:** número de notas objetivo del patrón principal, elegida por nivel (Baja 3-4, Media 5-6, Alta 7-9), con *clamp* automático de factibilidad según la longitud del patrón y las duraciones permitidas.
-- El motor genera **exactamente** el número de notas objetivo, cuya suma total es igual a la Longitud del Patrón (la última se ajusta para cuadrar exacto).
-- **Precisión:** toda la aritmética de tiempos se hace en **ticks enteros** (`480` ppq), sin coma flotante en las posiciones de los eventos.
+- Python 3.10 o superior.
+- `rich` y `questionary` para la interfaz de terminal.
+- `prompt_toolkit` para bindings específicos de la TUI.
+- `mido` para la generación y manipulación MIDI.
+- `unittest` para las pruebas automatizadas.
+- Bibliotecas estándar de Python, incluyendo `pathlib` y `os`, para el acceso a archivos.
+- Git para el control de versiones.
 
-### 3.4 El Motor Melódico
-- **Tónica configurable:** El usuario elige la nota central (12 notas, solo sostenidos).
-- **Escalas Permitidas (2 octavas):** Mayor, Menor (Eólica), Menor Armónica, Frigio, Frigio Dominante.
-- El algoritmo trata la escala como un array de índices (donde el índice 0 es la nota C grave).
-- **Salto Melódico Máximo:** Parámetro del usuario (rango 1 a 5). Distancia máxima de intervalos entre notas consecutivas.
-- **Límites (Bounce):** Si el índice calculado sale del rango, la dirección del movimiento se invierte automáticamente.
-- **Riff:** la melodía se genera **una sola vez** y se repite en cada ciclo (el tail es su truncado).
-- **Regla Estricta:** La primera nota del patrón principal (y por tanto del tail) es SIEMPRE el índice 0 (la tónica elegida).
+Restricciones:
 
-### 3.5 Reglas Específicas de las Pistas
-- **Pad (Respiración):** El usuario define cada cuántos compases se vuelve a disparar el acorde/nota. **Regla de Drone Infinito:** Si la respiración es `0`, se envía un único `Note On` en el beat 0 y un `Note Off` al final del último compás.
-  - **Modo:** `Mono` (tónica) o `Acorde` (grados 1-3-5 de la escala).
-  - **Registro:** `Grave` (C3) o `Agudo` (C4).
-- **Percusión:**
-  - Caja (Snare): Golpe estático en el **beat 3** de cada compás (por defecto). En modo *double time* (solo 4/4), golpea en los tiempos **2 y 4**.
-  - Plato: Pulsos constantes en **negras** (por defecto). En *double time*, en **corcheas**. Configurable: hi-hat abierto (por defecto), hi-hat cerrado, ride, crash o china (notas GM 46/42/51/49/52).
-  - Bombo (Kick): Clona exactamente los instantes de ataque (`Note On`) generados por la pista del Bajo para acentuar el polirritmo.
-  - **Double time:** opción y/n que solo se ofrece en 4/4. Convierte la caja a 2 y 4 y el plato a corcheas (sensación el doble de rápida).
-- **Dinámica:** *Velocity* plano (0-127) por pista y *volumen* de canal (0-100, emitido como CC7) por pista.
-- **Sin claqueta (count-in) en el MVP.**
+- No introducir tecnologías web como JavaScript, HTML, CSS o WebAudio.
+- No utilizar frameworks de escritorio como Tkinter, PyQt o Electron.
+- No añadir dependencias externas sin justificar su necesidad y solicitar confirmación previa.
+- Todo el software debe ejecutarse desde la terminal.
 
-## 4. Flujo de la Interfaz TUI (Prompt Flow)
-1. **Configuración Global:** BPM y Duración en Compases (mostrando el compás 4/4, fijo en el MVP, y el total de beats resultante).
-2. **Estructura:** Duración del Patrón (beats), Respiración del Pad (0 = Drone), Modo del Pad (Mono/Acorde), Registro del Pad (Grave/Agudo).
-3. **Reglas Algorítmicas:** Nota central (tónica), Escala, Checkboxes de duraciones permitidas, Salto melódico máximo (1-7), Densidad (Baja/Media/Alta), Plato (hi-hat abierto/cerrado, ride, crash, china), Double time (y/n, solo 4/4).
-4. **Mezclador (opcional):** Velocity (0-127) y Volumen (0-100) por pista, previa confirmación y/n.
-5. **Lote:** Nº de variaciones a generar (1-5).
-6. **Acciones:** Generar. Tras generar, el usuario dispone de **💾 Exportar** (guardar el/los `.mid` en `/output` o carpeta elegida).
+## 4. Arquitectura y convenciones del proyecto
 
-## 5. Directivas Estrictas para la IA (Guardrails)
-- **Mantener la simplicidad del MVP:** No introducir progresiones de acordes, cambios de compás ni algoritmos de variación de velocity salvo petición explícita para versiones futuras.
-- **Arquitectura Modular:** Separar el código en módulos limpios: `models.py` (dataclasses/enums/constantes), `engine_math.py` (cálculo de secuencias y matrices, puro), `engine_midi.py` (construcción MIDI en memoria) y `tui.py` (interfaz interactiva).
-- **Estética Terminal:** Utilizar `rich` para formatear paneles de estado, barras de progreso y tablas con la estructura polirrítmica calculada.
-- **Precisión Matemática:** Garantizar que los tiempos acumulados de los eventos MIDI no sufran desviaciones por redondeo (se trabaja en ticks enteros).
+### Arquitectura
 
-## 6. Próximo Trabajo (Siguiente Sesión)
+- `main.py`: punto de entrada de la aplicación.
+- `cliff/models.py`: dataclasses, enums, constantes y conversiones básicas.
+- `cliff/engine_math.py`: lógica pura de ritmo, polimetría, melodía y eventos musicales.
+- `cliff/engine_midi.py`: construcción de archivos MIDI en memoria.
+- `cliff/tui.py`: interacción con el usuario y presentación mediante terminal.
+- `tests/`: pruebas automatizadas.
+- `specs/`: especificaciones técnicas detalladas.
+- `output/`: archivos MIDI exportados.
 
-- ~~Hacer que la pieza dure N veces (2 por defecto)~~ — **completado**.
-- ~~Sesgo de la nota final del patrón (`generate_rhythm_pattern`)~~ — **completado**: relleno por *backtracking* aleatorizado que mantiene todas las notas (incluida la última) dentro del pool, con fallback a "última nota = resto" solo cuando el patrón no es combinable.
-- ~~Duración por defecto a 4 compases~~ — **completado**.
-- ~~Leyenda de acciones del resultado~~ — **completado**: eliminada, queda el `select` de acciones (💾 Exportar / ↩ Volver / ✕ Salir).
-- ~~Incrementar/decrementar campos numéricos con flechas~~ — **completado**: enteros ±1; `pattern_beats` ±0.25.
-- ~~Navegación atrás entre preguntas~~ — **completado**: Ctrl+C retrocede una pregunta; en el primer prompt sale del programa.
-- ~~Variación del plato por loop~~ — **completado**: confirm "¿Variar el plato en cada loop? (aleatorio)" (solo si loops > 1); el primer loop usa el plato elegido y los siguientes eligen otro distinto al azar.
-- ~~Densidad relativa al rango factible (`resolve_density` / `DENSITY_FRACTIONS`)~~ — **completado**: la densidad se interpreta como fracción del rango `[min_notes, max_notes]` (Baja 0.25, Media 0.5, Alta 0.8), eliminando el colapso a "todo negras" cuando la negra está en el pool.
-- ~~Guarda de combinabilidad~~ — **completado**: `pattern_is_combinable` (gcd) avisa/bloquea en la TUI cuando `pattern_beats × 4` es impar (XX.25/XX.75) sin corchea con puntillo ni semicorchea en el pool.
-- Guardado y carga de semillas numéricas (*Seeds*) para reproducir o compartir patrones exactos (primera entrada del roadmap en `README.md`).
-- Revisar el motor de decisión de notas/steps del riff (`generate_melody_indices`): distribución uniforme del paso, dirección 50/50 y plegado espejo en bordes — evaluar sesgo hacia grados conjuntos y conciencia de la tónica.
-- Aplazado: opción para **evitar tónicas consecutivas** en la recurrencia de tónica (flag booleano + guard; decidir semántica estricta vs. suave bajo el post-procesado).
-- Posible feature futura: **secuenciador de ritmo** en la TUI (grid de *onsets* del riff sobre el resumen, estilo *step sequencer*). Aplazado por salirse del alcance actual de la aplicación.
-- ~~Tail con notas diferentes~~ — **completado**: flag `tail_vary` (y/n tras el diagrama de bloques); el tail mantiene el ritmo truncado y la tónica inicial, pero con melodía (pitches) propia.
-- ~~Fill al final del loop~~ — **completado**: flag `fill` (y/n, solo si loops > 1); roll de caja (4 semicorcheas) en el último beat de cada loop + `plato_alt` en el downbeat del siguiente (con `cymbal_vary`, eco del plato saliente; si no, plato aleatorio distinto del principal).
-- ~~Intros~~ — **completado**: flag `intro` (y/n); count-in de 4 golpes de hi-hat en negras (1 compás) que desplaza la pieza. Aplazados para el futuro: drone suave y tail como intro.
-- ~~Navegación por secciones con clear + header compacto~~ — **completado**: cada sección (y la pantalla de resultados) se muestra tras un `clear` de la terminal, con header compacto arriba y las preguntas empezando desde el tope (`_clear_screen` + `_show_header_compact` en `_run_sections`).
-- Posible feature futura: **live form** en la TUI — re-render del header + título + respuestas ya dadas antes de cada pregunta, para que la pregunta activa quede siempre cerca del tope (hoy la limpieza solo ocurre al cambiar de sección).
-- Añadir al `README.md` una pequeña sección de *tips & tricks* para futuros usuarios.
----
+### Convenciones
 
-## Control de versiones
+- Mantén separadas la interacción, la lógica musical y la generación MIDI.
+- `engine_math.py` no debe realizar I/O ni depender de `mido`.
+- Calcula los tiempos MIDI con ticks enteros usando 480 ticks por beat.
+- Transporta la configuración mediante `SongConfig` y los resultados mediante `SequenceData`.
+- Las funciones matemáticas deben ser deterministas cuando se controle el estado del generador aleatorio.
+- Mantén los cambios pequeños y coherentes con la arquitectura existente.
+- Usa nombres de código, comentarios y docstrings nuevos en inglés.
+- Mantén la documentación funcional sincronizada con `README.md` y `specs/`.
+- `AGENTS.md` establece restricciones operativas; no sustituye la documentación técnica del proyecto.
+- Cuando existan contradicciones entre el código, las pruebas, la documentación o las especificaciones, detén el desarrollo y notifica explícitamente la contradicción antes de continuar.
 
-Propón commits cuando:
+## 5. Control de alcance y ejecución
 
-- Haya cambios sustanciales en el código
-- Se completen tareas/objetivos
+- Trabaja exclusivamente en la tarea actual.
+- No inicies funcionalidades adicionales, refactorizaciones generales ni mejoras no solicitadas.
+- Si aparece una mejora no esencial, menciónala brevemente y déjala fuera del trabajo actual.
+- Si el usuario propone una tarea que interrumpe otra en curso, señala la situación antes de cambiar de objetivo.
+- Prioriza cambios pequeños, verificables y compatibles con la arquitectura existente.
+- Antes de modificar código, revisa el contexto relevante, las pruebas y los cambios existentes.
+- No consideres una tarea terminada hasta ejecutar las validaciones aplicables.
 
-Se usará inglés para el nombre y los mensajes los commits, con un lenguaje sencillo, breve y conciso. Si en algún momento, por los cambios llevados a cabo, es necesario explayarse, no hay problema, pero debe ser en la menor parte de los casos.
+## 6. Gestión de `TODO.md`
 
-Siempre plantéalos y espera confirmación antes de llevarlos a cabo.
+- `TODO.md` debe existir siempre en la raíz del proyecto.
+- Si no existe, créalo antes de comenzar el trabajo.
+- Al iniciar una tarea nueva, léelo para conocer el estado y el objetivo actual.
+- Mantenlo como documento vivo de planificación.
+- Actualízalo cuando cambie el estado de una tarea o se complete un objetivo.
+- Si se decide limpiarlo tras alcanzar un hito, conserva el archivo vacío en lugar de eliminarlo.
+- Cuando una tarea principal quede completada y validada, informa de la actualización realizada o proporciona el fragmento Markdown correspondiente.
+
+## 7. Gestión de `suggestions.md`
+
+- `suggestions.md` debe existir siempre en la raíz del proyecto.
+- Si no existe, créalo antes de comenzar el trabajo.
+- Úsalo como repositorio de ideas, mejoras futuras y refactorizaciones no críticas.
+- No implementes sugerencias mientras trabajas en la tarea actual, salvo petición explícita.
+- Antes de añadir una idea, lee el archivo para evitar duplicados o conflictos.
+- Si existe una contradicción con una sugerencia anterior, notifícala y consúltala.
+- Usa estos estados:
+  - Pendiente: `- [ ] Descripción`
+  - Implementada: `- [x] Descripción`
+  - Descartada: `~~- [ ] Descripción~~`
+- Redacta las sugerencias de forma breve, concreta y orientada a una posible tarea futura.
+
+## 8. Gestión de `CHANGELOG.md`
+
+- `CHANGELOG.md` debe existir en la raíz del proyecto.
+- Si no existe, créalo siguiendo el formato Keep a Changelog.
+- Registra funcionalidades completadas, cambios relevantes, correcciones importantes y eliminaciones.
+- Añade la entrada correspondiente antes de fusionar una rama que contenga una funcionalidad o corrección significativa.
+- Clasifica los cambios bajo `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed` o `Security`.
+- No registres cambios internos triviales que no afecten al comportamiento, uso o mantenimiento relevante del proyecto.
+- Redacta las entradas en inglés.
+
+## 9. Flujo de trabajo con Git
+
+- Nunca escribas código directamente en `main` ni `master`.
+- `main`/`master` solo recibe pull requests procedentes de `develop` para incorporar versiones estables.
+- El desarrollo se realiza principalmente en `develop`.
+- Para tareas concretas, crea normalmente una rama derivada de `develop`.
+- Se permiten commits puntuales directamente en `develop` cuando el cambio sea pequeño y no justifique una rama independiente.
+- Al comenzar una tarea nueva, propón primero el comando para crear la rama correspondiente.
+- Usa nombres descriptivos como:
+  - `feature/nombre-corto`
+  - `bugfix/nombre-del-bug`
+  - `refactor/nombre-del-modulo`
+  - `chore/nombre-corto`
+  - `hotfix/nombre-del-bug`
+- Estas categorías son ejemplos, no una lista cerrada.
+- Propón el comando exacto de commit al terminar subtareas o antes de cambios arriesgados.
+- Utiliza mensajes en inglés y formato Conventional Commits, por ejemplo: `feat: add seed persistence`.
+- Al completar y validar el objetivo, informa al usuario para proceder con el push o pull request.
+- No ejecutes commits, merges, pushes ni operaciones destructivas sin autorización explícita del usuario.
+
+## 10. Convenciones de código
+
+- El código nuevo debe utilizar nombres de variables, funciones, clases y módulos en inglés.
+- Los comentarios y docstrings nuevos deben redactarse en inglés.
+- Los comentarios deben explicar decisiones no obvias, reglas musicales, restricciones técnicas o lógica compleja.
+- No es obligatorio añadir un comentario al inicio de cada bloque de código; evita comentarios redundantes.
+- Mantén el estilo, la estructura y el nivel de abstracción existentes salvo que la tarea requiera modificarlos.
+- Prefiere funciones pequeñas y responsabilidades bien delimitadas.
+- Usa type hints cuando sean coherentes con el código existente.
+- No introduzcas cambios de formato masivos ni refactorizaciones cosméticas fuera del alcance de la tarea.
+- Mantén la nomenclatura musical y técnica coherente con `models.py`, `README.md` y `specs/`.
+- No modifiques comentarios o docstrings existentes únicamente para traducirlos, salvo que formen parte de la tarea actual.
+
+## 11. Manejo de errores y bugs
+
+1. **Parada táctica:** detén el desarrollo de nuevas funcionalidades y no construyas sobre código roto.
+2. **Diagnóstico:** reproduce el problema cuando sea posible y revisa el error, las pruebas y el código relacionado.
+3. **Comunicación:** explica el origen probable del problema de forma breve y clara.
+4. **Solución pragmática:** aplica la corrección mínima cuando sea suficiente y prefiere soluciones de raíz frente a parches que oculten el problema.
+5. **Control del alcance:** si la solución requiere modificar partes no relacionadas, informa al usuario antes de ampliar el trabajo.
+6. **Validación:** ejecuta las pruebas relevantes y comunica cualquier validación manual necesaria.
+7. **Recuperación segura:** no ejecutes `git reset --hard`, borres archivos ni descartes cambios automáticamente. Si fuera necesario recuperar un estado anterior, explica las alternativas y solicita autorización explícita.
+
+No es obligatorio solicitar un log si el error ya está disponible en la salida de comandos o puede reproducirse localmente.
+
+## 12. Testing y validación
+
+- Ninguna implementación se considera terminada hasta haber sido validada.
+- Cuando modifiques lógica de negocio o musical, añade o actualiza pruebas automatizadas.
+- Prioriza el caso normal, los casos límite y las regresiones relacionadas con el cambio.
+- Utiliza el framework de testing existente (`unittest`) salvo autorización para introducir otro.
+- Ejecuta las pruebas relevantes después de cada cambio significativo.
+- Si el cambio afecta a la TUI, UX, terminal o exportación MIDI, indica claramente cualquier validación manual necesaria.
+- Diferencia entre validación automatizada, validación manual y validación pendiente.
+- No afirmes que una tarea está completamente validada si alguna comprobación importante no se ha podido ejecutar.
+- Propón el commit final únicamente cuando las pruebas aplicables pasen y la validación manual necesaria haya sido confirmada por el usuario o se haya indicado explícitamente que queda pendiente.
